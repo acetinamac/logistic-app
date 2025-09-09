@@ -1,0 +1,354 @@
+basePath: /api
+definitions:
+  logistics-app_backend_internal_domain.Address:
+    properties:
+      city:
+        type: string
+      country:
+        type: string
+      ext_num:
+        type: string
+      int_num:
+        type: string
+      remarks:
+        type: string
+      state:
+        type: string
+      street:
+        type: string
+      zipcode:
+        type: string
+    type: object
+  logistics-app_backend_internal_domain.Coordinates:
+    properties:
+      lat:
+        type: number
+      lng:
+        type: number
+    type: object
+  logistics-app_backend_internal_domain.Order:
+    properties:
+      created_at:
+        type: string
+      customer_id:
+        type: integer
+      destination_address:
+        $ref: '#/definitions/logistics-app_backend_internal_domain.Address'
+      destination_coord:
+        $ref: '#/definitions/logistics-app_backend_internal_domain.Coordinates'
+      id:
+        type: integer
+      items_count:
+        type: integer
+      origin_address:
+        $ref: '#/definitions/logistics-app_backend_internal_domain.Address'
+      origin_coord:
+        $ref: '#/definitions/logistics-app_backend_internal_domain.Coordinates'
+      size:
+        $ref: '#/definitions/logistics-app_backend_internal_domain.PackageSize'
+      status:
+        $ref: '#/definitions/logistics-app_backend_internal_domain.OrderStatus'
+      updated_at:
+        type: string
+      weight_kg:
+        type: number
+    type: object
+  logistics-app_backend_internal_domain.OrderStatus:
+    enum:
+    - creado
+    - recolectado
+    - en_estacion
+    - en_ruta
+    - entregado
+    - cancelado
+    type: string
+    x-enum-varnames:
+    - StatusCreado
+    - StatusRecolectado
+    - StatusEnEstacion
+    - StatusEnRuta
+    - StatusEntregado
+    - StatusCancelado
+  logistics-app_backend_internal_domain.PackageSize:
+    enum:
+    - S
+    - M
+    - L
+    type: string
+    x-enum-varnames:
+    - SizeS
+    - SizeM
+    - SizeL
+  logistics-app_backend_internal_domain.Role:
+    enum:
+    - client
+    - admin
+    type: string
+    x-enum-varnames:
+    - RoleClient
+    - RoleAdmin
+  logistics-app_backend_internal_domain.User:
+    properties:
+      email:
+        type: string
+      id:
+        type: integer
+      role:
+        $ref: '#/definitions/logistics-app_backend_internal_domain.Role'
+    type: object
+info:
+  contact:
+    email: devs@example.com
+    name: Equipo Backend
+  description: API del backend de logística.
+  title: Logistics API
+  version: "1.0"
+paths:
+  /admin/orders:
+    get:
+      description: Returns all orders (admin only)
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of all orders
+          schema:
+            items:
+              $ref: '#/definitions/logistics-app_backend_internal_domain.Order'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get all orders
+      tags:
+      - admin
+  /admin/orders/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Updates the status of an order (admin only)
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: New status
+        in: body
+        name: status
+        required: true
+        schema:
+          properties:
+            status:
+              type: string
+          type: object
+      responses:
+        "204":
+          description: No content
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Update order status
+      tags:
+      - admin
+  /login:
+    post:
+      consumes:
+      - application/json
+      description: Authenticates user and returns JWT token
+      parameters:
+      - description: Login credentials
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            email:
+              type: string
+            password:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: JWT token
+          schema:
+            properties:
+              token:
+                type: string
+            type: object
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "401":
+          description: Not authorized
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      summary: Login endpoint
+      tags:
+      - auth
+  /orders:
+    get:
+      description: Returns orders for authenticated user
+      parameters:
+      - description: Get all orders (admin only)
+        in: query
+        name: all
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: List of orders
+          schema:
+            items:
+              $ref: '#/definitions/logistics-app_backend_internal_domain.Order'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get user orders
+      tags:
+      - orders
+    post:
+      consumes:
+      - application/json
+      description: Creates a new order for authenticated user
+      parameters:
+      - description: Order details
+        in: body
+        name: order
+        required: true
+        schema:
+          $ref: '#/definitions/logistics-app_backend_internal_domain.Order'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created order
+          schema:
+            $ref: '#/definitions/logistics-app_backend_internal_domain.Order'
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Create new order
+      tags:
+      - orders
+  /users:
+    post:
+      consumes:
+      - application/json
+      description: Creates a new user account
+      parameters:
+      - description: User registration details
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            email:
+              type: string
+            password:
+              type: string
+            role:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created user
+          schema:
+            $ref: '#/definitions/logistics-app_backend_internal_domain.User'
+        "400":
+          description: Bad request
+          schema:
+            type: string
+      summary: Register new user
+      tags:
+      - users
+  /users/{id}:
+    delete:
+      description: Deletes a user account (admin or own account only)
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No content
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Delete user
+      tags:
+      - users
+securityDefinitions:
+  BearerAuth:
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
