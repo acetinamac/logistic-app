@@ -3,6 +3,8 @@ package usecase
 import (
 	"errors"
 	"logistics-app/backend/internal/domain"
+
+	"golang.org/x/crypto/bcrypt"
 )
 
 type UserRepo interface {
@@ -28,7 +30,12 @@ func (s *UserService) Register(email, password, fullName, phone string, role dom
 		role = domain.RoleClient
 	}
 
-	u := &domain.User{Email: email, Password: password, FullName: fullName, Phone: phone, Role: role, IsActive: true}
+	// Hash password before storing
+	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, errors.New("no se pudo encriptar el password")
+	}
+	u := &domain.User{Email: email, Password: string(hash), FullName: fullName, Phone: phone, Role: role, IsActive: true}
 	if err := s.repo.Create(u); err != nil {
 		return nil, err
 	}
@@ -49,7 +56,8 @@ func (s *UserService) Authenticate(email, password string) (*domain.User, error)
 		return nil, errors.New("invalid credentials")
 	}
 
-	if u.Password != password {
+	// Compare provided password with stored bcrypt hash
+	if err := bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(password)); err != nil {
 		return nil, errors.New("invalid password")
 	}
 	return u, nil

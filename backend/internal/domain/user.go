@@ -14,7 +14,7 @@ type User struct {
 	Email            string    `json:"email" gorm:"uniqueIndex;size:255"`
 	Password         string    `json:"-"`
 	Phone            string    `json:"phone" gorm:"size:20"`
-	FullName         string    `json:"full_name" gorm:"size:255"`
+	FullName         string    `json:"full_name" gorm:"size:255;not null"`
 	Role             Role      `json:"role" gorm:"type:user_role_enum;default:client;not null"`
 	IsActive         bool      `json:"is_active" gorm:"default:true;not null"`
 	DefaultAddressID *uint     `json:"default_address_id"`
