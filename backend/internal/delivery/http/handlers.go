@@ -101,7 +101,7 @@ func (h *Handler) Login(w http.ResponseWriter, r *http.Request) {
 // @Tags users
 // @Accept json
 // @Produce json
-// @Param request body object{email=string,password=string,role=string} true "User registration details"
+// @Param request body object{email=string,password=string,full_name=string,phone=string,role=string} true "User registration details"
 // @Success 201 {object} domain.User "Created user"
 // @Failure 400 {string} string "Bad request"
 // @Router /users [post]
@@ -109,13 +109,15 @@ func (h *Handler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 	var body struct {
 		Email    string      `json:"email"`
 		Password string      `json:"password"`
+		FullName string      `json:"full_name"`
+		Phone    string      `json:"phone"`
 		Role     domain.Role `json:"role"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		http.Error(w, err.Error(), 400)
 		return
 	}
-	u, err := h.Users.Register(body.Email, body.Password, body.Role)
+	u, err := h.Users.Register(body.Email, body.Password, body.FullName, body.Phone, body.Role)
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 		return

@@ -22,7 +22,7 @@ func Bootstrap(r *mux.Router) error {
 		return err
 	}
 	// Seed simple admin if not exists
-	database.Where(domain.User{Email: "admin@example.com"}).Attrs(domain.User{Password: "admin", Role: domain.RoleAdmin}).FirstOrCreate(&domain.User{})
+	database.Where(domain.User{Email: "admin@example.com"}).Attrs(domain.User{Password: "admin", Role: domain.RoleAdmin, FullName: "Admin", IsActive: true}).FirstOrCreate(&domain.User{})
 
 	orderRepo := repository.NewOrderGormRepo(database)
 	orderSvc := usecase.NewOrderService(orderRepo)

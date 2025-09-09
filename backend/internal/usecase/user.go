@@ -11,20 +11,24 @@ type UserRepo interface {
 	DeleteByID(id uint) error
 }
 
-type UserService struct{ repo UserRepo }
+type UserService struct {
+	repo UserRepo
+}
 
-func NewUserService(r UserRepo) *UserService { return &UserService{repo: r} }
+func NewUserService(r UserRepo) *UserService {
+	return &UserService{repo: r}
+}
 
-func (s *UserService) Register(email, password string, role domain.Role) (*domain.User, error) {
-	if email == "" || password == "" {
-		return nil, errors.New("email y password requeridos")
+func (s *UserService) Register(email, password, fullName, phone string, role domain.Role) (*domain.User, error) {
+	if email == "" || password == "" || fullName == "" {
+		return nil, errors.New("email, password y full_name requeridos")
 	}
 
 	if role != domain.RoleClient && role != domain.RoleAdmin {
 		role = domain.RoleClient
 	}
 
-	u := &domain.User{Email: email, Password: password, Role: role}
+	u := &domain.User{Email: email, Password: password, FullName: fullName, Phone: phone, Role: role, IsActive: true}
 	if err := s.repo.Create(u); err != nil {
 		return nil, err
 	}

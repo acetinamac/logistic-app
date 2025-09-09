@@ -24,6 +24,10 @@ func Connect() (*Database, error) {
 	if err != nil {
 		return nil, err
 	}
+	// Ensure PostgreSQL enum type for user role exists ;)
+	if err := database.Exec("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_role_enum') THEN CREATE TYPE user_role_enum AS ENUM ('client','admin'); END IF; END $$;").Error; err != nil {
+		return nil, err
+	}
 	log.Println("connected to postgres")
 	return &Database{database}, nil
 }

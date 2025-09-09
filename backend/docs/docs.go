@@ -326,7 +326,13 @@ const docTemplate = `{
                                 "email": {
                                     "type": "string"
                                 },
+                                "full_name": {
+                                    "type": "string"
+                                },
                                 "password": {
+                                    "type": "string"
+                                },
+                                "phone": {
                                     "type": "string"
                                 },
                                 "role": {
@@ -527,14 +533,35 @@ const docTemplate = `{
         "logistics-app_backend_internal_domain.User": {
             "type": "object",
             "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "default_address_id": {
+                    "type": "integer"
+                },
                 "email": {
+                    "type": "string"
+                },
+                "full_name": {
                     "type": "string"
                 },
                 "id": {
                     "type": "integer"
                 },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "phone": {
+                    "type": "string"
+                },
                 "role": {
                     "$ref": "#/definitions/logistics-app_backend_internal_domain.Role"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "updated_by": {
+                    "type": "integer"
                 }
             }
         }

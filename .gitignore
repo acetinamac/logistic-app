@@ -34,3 +34,4 @@ go.work.sum
 # Directories
 /frontend/node_modules
 /backend/tmp
+/frontend/.next
