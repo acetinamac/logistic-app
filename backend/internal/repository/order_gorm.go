@@ -4,6 +4,7 @@ import (
 	"errors"
 	"logistics-app/backend/internal/domain"
 	"logistics-app/backend/internal/infra/db"
+	"time"
 
 	"gorm.io/gorm"
 )
@@ -38,13 +39,29 @@ func (r *OrderGormRepo) FindAll() ([]domain.Order, error) {
 	return list, nil
 }
 
-func (r *OrderGormRepo) UpdateStatus(id uint, status domain.OrderStatus) error {
-	res := r.db.Model(&domain.Order{}).Where("id = ?", id).Update("status", status)
-	if res.Error != nil {
-		return res.Error
-	}
-	if res.RowsAffected == 0 {
-		return errors.New("order not found")
-	}
-	return nil
+func (r *OrderGormRepo) UpdateStatus(id uint, status domain.OrderStatus, changedBy uint) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		var o domain.Order
+		if err := tx.First(&o, id).Error; err != nil {
+			if errors.Is(err, gorm.ErrRecordNotFound) {
+				return errors.New("order not found")
+			}
+			return err
+		}
+		prev := o.Status
+		if err := tx.Model(&domain.Order{}).Where("id = ?", id).Updates(map[string]interface{}{"status": status, "updated_by": changedBy}).Error; err != nil {
+			return err
+		}
+		h := domain.OrderStatusHistory{
+			OrderID:        id,
+			PreviousStatus: prev,
+			NewStatus:      status,
+			ChangedAt:      time.Now(),
+			ChangedBy:      changedBy,
+		}
+		if err := tx.Create(&h).Error; err != nil {
+			return err
+		}
+		return nil
+	})
 }

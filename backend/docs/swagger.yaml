@@ -1,84 +1,52 @@
 basePath: /api
 definitions:
-  logistics-app_backend_internal_domain.Address:
-    properties:
-      city:
-        type: string
-      country:
-        type: string
-      ext_num:
-        type: string
-      int_num:
-        type: string
-      remarks:
-        type: string
-      state:
-        type: string
-      street:
-        type: string
-      zipcode:
-        type: string
-    type: object
-  logistics-app_backend_internal_domain.Coordinates:
-    properties:
-      lat:
-        type: number
-      lng:
-        type: number
-    type: object
   logistics-app_backend_internal_domain.Order:
     properties:
+      actual_weight_kg:
+        type: number
       created_at:
         type: string
+      created_by:
+        type: integer
       customer_id:
         type: integer
-      destination_address:
-        $ref: '#/definitions/logistics-app_backend_internal_domain.Address'
-      destination_coord:
-        $ref: '#/definitions/logistics-app_backend_internal_domain.Coordinates'
+      destination_address_id:
+        type: integer
       id:
         type: integer
-      items_count:
+      internal_notes:
+        type: string
+      observations:
+        type: string
+      order_number:
+        type: string
+      origin_address_id:
         type: integer
-      origin_address:
-        $ref: '#/definitions/logistics-app_backend_internal_domain.Address'
-      origin_coord:
-        $ref: '#/definitions/logistics-app_backend_internal_domain.Coordinates'
-      size:
-        $ref: '#/definitions/logistics-app_backend_internal_domain.PackageSize'
+      package_type_id:
+        type: integer
       status:
         $ref: '#/definitions/logistics-app_backend_internal_domain.OrderStatus'
       updated_at:
         type: string
-      weight_kg:
-        type: number
+      updated_by:
+        type: integer
     type: object
   logistics-app_backend_internal_domain.OrderStatus:
     enum:
-    - creado
-    - recolectado
-    - en_estacion
-    - en_ruta
-    - entregado
-    - cancelado
+    - created
+    - collected
+    - in_station
+    - in_route
+    - delivered
+    - cancelled
     type: string
     x-enum-varnames:
-    - StatusCreado
-    - StatusRecolectado
-    - StatusEnEstacion
-    - StatusEnRuta
-    - StatusEntregado
-    - StatusCancelado
-  logistics-app_backend_internal_domain.PackageSize:
-    enum:
-    - S
-    - M
-    - L
-    type: string
-    x-enum-varnames:
-    - SizeS
-    - SizeM
-    - SizeL
+    - OrderCreated
+    - OrderCollected
+    - OrderInStation
+    - OrderInRoute
+    - OrderDelivered
+    - OrderCancelled
   logistics-app_backend_internal_domain.Role:
     enum:
     - client
@@ -145,46 +113,6 @@ paths:
       security:
       - BearerAuth: []
       summary: Get all orders
-      tags:
-      - admin
-  /admin/orders/{id}/status:
-    patch:
-      consumes:
-      - application/json
-      description: Updates the status of an order (admin only)
-      parameters:
-      - description: Order ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: New status
-        in: body
-        name: status
-        required: true
-        schema:
-          properties:
-            status:
-              type: string
-          type: object
-      responses:
-        "204":
-          description: No content
-        "400":
-          description: Bad request
-          schema:
-            type: string
-        "401":
-          description: Unauthorized
-          schema:
-            type: string
-        "403":
-          description: Forbidden
-          schema:
-            type: string
-      security:
-      - BearerAuth: []
-      summary: Update order status
       tags:
       - admin
   /login:
@@ -296,6 +224,46 @@ paths:
       security:
       - BearerAuth: []
       summary: Create new order
+      tags:
+      - orders
+  /orders/{id}/status:
+    patch:
+      consumes:
+      - application/json
+      description: Updates the status of an order (admin only)
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: New status
+        in: body
+        name: status
+        required: true
+        schema:
+          properties:
+            status:
+              type: string
+          type: object
+      responses:
+        "204":
+          description: No content
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Update order status
       tags:
       - orders
   /users:

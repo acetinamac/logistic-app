@@ -43,7 +43,7 @@ func (h *Handler) Register(r *mux.Router) {
 	r.HandleFunc("/api/orders", h.CreateOrder).Methods(http.MethodPost)
 	r.HandleFunc("/api/orders", h.MyOrders).Methods(http.MethodGet)
 	r.HandleFunc("/api/admin/orders", h.AllOrders).Methods(http.MethodGet)
-	r.HandleFunc("/api/admin/orders/{id}/status", h.UpdateStatus).Methods(http.MethodPatch)
+	r.HandleFunc("/api/orders/{id}/status", h.UpdateStatus).Methods(http.MethodPatch)
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200); _, _ = w.Write([]byte("ok")) }).Methods(http.MethodGet)
 }
 
@@ -186,6 +186,8 @@ func (h *Handler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	o.CustomerID = uid
+	o.CreatedBy = uid
+	o.UpdatedBy = &uid
 	if err := h.Orders.Create(&o); err != nil {
 		http.Error(w, err.Error(), 400)
 		return
@@ -264,7 +266,7 @@ func (h *Handler) AllOrders(w http.ResponseWriter, r *http.Request) {
 // UpdateStatus godoc
 // @Summary Update order status
 // @Description Updates the status of an order (admin only)
-// @Tags admin
+// @Tags orders
 // @Accept json
 // @Param id path integer true "Order ID"
 // @Param status body object{status=string} true "New status"
@@ -273,9 +275,9 @@ func (h *Handler) AllOrders(w http.ResponseWriter, r *http.Request) {
 // @Failure 401 {string} string "Unauthorized"
 // @Failure 403 {string} string "Forbidden"
 // @Security BearerAuth
-// @Router /admin/orders/{id}/status [patch]
+// @Router /orders/{id}/status [patch]
 func (h *Handler) UpdateStatus(w http.ResponseWriter, r *http.Request) {
-	_, role, ok := auth(r)
+	uid, role, ok := auth(r)
 	if !ok {
 		http.Error(w, "unauthorized", 401)
 		return
@@ -293,7 +295,7 @@ func (h *Handler) UpdateStatus(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), 400)
 		return
 	}
-	if err := h.Orders.UpdateStatus(uint(id64), body.Status); err != nil {
+	if err := h.Orders.UpdateStatus(uint(id64), body.Status, uid); err != nil {
 		http.Error(w, err.Error(), 400)
 		return
 	}

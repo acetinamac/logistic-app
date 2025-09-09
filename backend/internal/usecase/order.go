@@ -2,7 +2,9 @@ package usecase
 
 import (
 	"errors"
+	"fmt"
 	"logistics-app/backend/internal/domain"
+	"time"
 )
 
 type OrderRepo interface {
@@ -10,7 +12,7 @@ type OrderRepo interface {
 	FindByID(id uint) (*domain.Order, error)
 	FindByCustomer(customerID uint) ([]domain.Order, error)
 	FindAll() ([]domain.Order, error)
-	UpdateStatus(id uint, status domain.OrderStatus) error
+	UpdateStatus(id uint, status domain.OrderStatus, changedBy uint) error
 }
 
 type OrderService struct{ repo OrderRepo }
@@ -22,42 +24,35 @@ func (s *OrderService) FindByCustomer(customerID uint) ([]domain.Order, error) {
 	return s.repo.FindByCustomer(customerID)
 }
 
-func (s *OrderService) DetermineSize(weight float64) (domain.PackageSize, error) {
-	if weight <= 5 {
-		return domain.SizeS, nil
-	} else if weight <= 15 {
-		return domain.SizeM, nil
-	} else if weight <= 25 {
-		return domain.SizeL, nil
-	}
-	return "", errors.New("peso superior a 25 kg: contactar a la empresa para convenio especial")
+func generateOrderNumber(t time.Time) string {
+	return fmt.Sprintf("ORD-%s-%d", t.Format("20060102"), t.UnixNano()%1_000_000)
 }
 
 func (s *OrderService) Create(o *domain.Order) error {
-	// Validar coordenadas
-	if o.OriginCoord.Lat < -90 || o.OriginCoord.Lat > 90 || o.OriginCoord.Lng < -180 || o.OriginCoord.Lng > 180 {
-		return errors.New("coordenadas de origen inválidas")
+	if o.OriginAddressID == 0 || o.DestinationAddressID == 0 {
+		return errors.New("origin_address_id y destination_address_id son requeridos")
 	}
-	if o.DestinationCoord.Lat < -90 || o.DestinationCoord.Lat > 90 || o.DestinationCoord.Lng < -180 || o.DestinationCoord.Lng > 180 {
-		return errors.New("coordenadas de destino inválidas")
+	if o.OriginAddressID == o.DestinationAddressID {
+		return errors.New("origin y destination deben ser diferentes")
 	}
-	if o.ItemsCount <= 0 {
-		return errors.New("items_count debe ser > 0")
+	if o.PackageTypeID == 0 {
+		return errors.New("package_type_id es requerido")
 	}
-	if o.WeightKg <= 0 {
-		return errors.New("weight_kg debe ser > 0")
+	if o.CustomerID == 0 || o.CreatedBy == 0 {
+		return errors.New("customer_id y created_by son requeridos")
 	}
-	// Determinar tamaño
-	size, err := s.DetermineSize(o.WeightKg)
-	if err != nil {
-		return err
+	if o.OrderNumber == "" {
+		o.OrderNumber = generateOrderNumber(time.Now())
 	}
-	o.Size = size
-	o.Status = domain.StatusCreado
+	if o.Status == "" {
+		o.Status = domain.OrderCreated
+	}
 	return s.repo.Create(o)
 }
 
-func (s *OrderService) UpdateStatus(id uint, status domain.OrderStatus) error {
-	// Se puede agregar validación de transición si se requiere.
-	return s.repo.UpdateStatus(id, status)
+func (s *OrderService) UpdateStatus(id uint, status domain.OrderStatus, changedBy uint) error {
+	if changedBy == 0 {
+		return errors.New("changedBy requerido")
+	}
+	return s.repo.UpdateStatus(id, status, changedBy)
 }

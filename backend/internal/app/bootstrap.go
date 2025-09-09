@@ -19,11 +19,18 @@ func Bootstrap(r *mux.Router) error {
 		return err
 	}
 	// AutoMigrate
-	if err := database.AutoMigrate(&domain.User{}, &domain.Order{}); err != nil {
+	if err := database.AutoMigrate(
+		&domain.User{},
+		&domain.Coordinates{},
+		&domain.Address{},
+		&domain.PackageType{},
+		&domain.Order{},
+		&domain.OrderStatusHistory{},
+	); err != nil {
 		return err
 	}
 	// Seed simple admin if not exists (store hashed password)
-	admin := domain.User{Email: "admin@example.com", FullName: "Admin", IsActive: true}
+	admin := domain.User{Email: "admin@example.com", FullName: "System Administrator", IsActive: true}
 	var existing domain.User
 	if err := database.Where(&admin).First(&existing).Error; err != nil {
 		// Not found -> create with hashed password
@@ -35,6 +42,21 @@ func Bootstrap(r *mux.Router) error {
 			hashed, _ := bcrypt.GenerateFromPassword([]byte(existing.Password), bcrypt.DefaultCost)
 			existing.Password = string(hashed)
 			database.Save(&existing)
+		}
+	}
+	// Seed default package types if not present
+	var count int64
+	database.Model(&domain.PackageType{}).Count(&count)
+	if count == 0 {
+		// S, M, L, XL
+		pts := []domain.PackageType{
+			{SizeCode: domain.PackageS, MaxWeightKg: 5.00, Description: "Small package - up to 5 kg", IsActive: true},
+			{SizeCode: domain.PackageM, MaxWeightKg: 15.00, Description: "Medium package - up to 15 kg", IsActive: true},
+			{SizeCode: domain.PackageL, MaxWeightKg: 25.00, Description: "Large package - up to 25 kg", IsActive: true},
+			{SizeCode: domain.PackageXL, MaxWeightKg: 999.99, Description: "Extra Large package - over 25 kg (special service)", IsActive: true},
+		}
+		for _, p := range pts {
+			_ = database.Create(&p).Error
 		}
 	}
 

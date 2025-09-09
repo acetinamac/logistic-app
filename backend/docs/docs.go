@@ -64,69 +64,6 @@ const docTemplate = `{
                 }
             }
         },
-        "/admin/orders/{id}/status": {
-            "patch": {
-                "security": [
-                    {
-                        "BearerAuth": []
-                    }
-                ],
-                "description": "Updates the status of an order (admin only)",
-                "consumes": [
-                    "application/json"
-                ],
-                "tags": [
-                    "admin"
-                ],
-                "summary": "Update order status",
-                "parameters": [
-                    {
-                        "type": "integer",
-                        "description": "Order ID",
-                        "name": "id",
-                        "in": "path",
-                        "required": true
-                    },
-                    {
-                        "description": "New status",
-                        "name": "status",
-                        "in": "body",
-                        "required": true,
-                        "schema": {
-                            "type": "object",
-                            "properties": {
-                                "status": {
-                                    "type": "string"
-                                }
-                            }
-                        }
-                    }
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No content"
-                    },
-                    "400": {
-                        "description": "Bad request",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "401": {
-                        "description": "Unauthorized",
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    "403": {
-                        "description": "Forbidden",
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                }
-            }
-        },
         "/login": {
             "post": {
                 "description": "Authenticates user and returns JWT token",
@@ -301,6 +238,69 @@ const docTemplate = `{
                 }
             }
         },
+        "/orders/{id}/status": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Updates the status of an order (admin only)",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Update order status",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "New status",
+                        "name": "status",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "status": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "post": {
                 "description": "Creates a new user account",
@@ -406,75 +406,41 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "logistics-app_backend_internal_domain.Address": {
-            "type": "object",
-            "properties": {
-                "city": {
-                    "type": "string"
-                },
-                "country": {
-                    "type": "string"
-                },
-                "ext_num": {
-                    "type": "string"
-                },
-                "int_num": {
-                    "type": "string"
-                },
-                "remarks": {
-                    "type": "string"
-                },
-                "state": {
-                    "type": "string"
-                },
-                "street": {
-                    "type": "string"
-                },
-                "zipcode": {
-                    "type": "string"
-                }
-            }
-        },
-        "logistics-app_backend_internal_domain.Coordinates": {
-            "type": "object",
-            "properties": {
-                "lat": {
-                    "type": "number"
-                },
-                "lng": {
-                    "type": "number"
-                }
-            }
-        },
         "logistics-app_backend_internal_domain.Order": {
             "type": "object",
             "properties": {
+                "actual_weight_kg": {
+                    "type": "number"
+                },
                 "created_at": {
                     "type": "string"
+                },
+                "created_by": {
+                    "type": "integer"
                 },
                 "customer_id": {
                     "type": "integer"
                 },
-                "destination_address": {
-                    "$ref": "#/definitions/logistics-app_backend_internal_domain.Address"
-                },
-                "destination_coord": {
-                    "$ref": "#/definitions/logistics-app_backend_internal_domain.Coordinates"
+                "destination_address_id": {
+                    "type": "integer"
                 },
                 "id": {
                     "type": "integer"
                 },
-                "items_count": {
+                "internal_notes": {
+                    "type": "string"
+                },
+                "observations": {
+                    "type": "string"
+                },
+                "order_number": {
+                    "type": "string"
+                },
+                "origin_address_id": {
                     "type": "integer"
                 },
-                "origin_address": {
-                    "$ref": "#/definitions/logistics-app_backend_internal_domain.Address"
-                },
-                "origin_coord": {
-                    "$ref": "#/definitions/logistics-app_backend_internal_domain.Coordinates"
-                },
-                "size": {
-                    "$ref": "#/definitions/logistics-app_backend_internal_domain.PackageSize"
+                "package_type_id": {
+                    "type": "integer"
                 },
                 "status": {
                     "$ref": "#/definitions/logistics-app_backend_internal_domain.OrderStatus"
@@ -482,41 +448,28 @@ const docTemplate = `{
                 "updated_at": {
                     "type": "string"
                 },
-                "weight_kg": {
-                    "type": "number"
+                "updated_by": {
+                    "type": "integer"
                 }
             }
         },
         "logistics-app_backend_internal_domain.OrderStatus": {
             "type": "string",
             "enum": [
-                "creado",
-                "recolectado",
-                "en_estacion",
-                "en_ruta",
-                "entregado",
-                "cancelado"
+                "created",
+                "collected",
+                "in_station",
+                "in_route",
+                "delivered",
+                "cancelled"
             ],
             "x-enum-varnames": [
-                "StatusCreado",
-                "StatusRecolectado",
-                "StatusEnEstacion",
-                "StatusEnRuta",
-                "StatusEntregado",
-                "StatusCancelado"
-            ]
-        },
-        "logistics-app_backend_internal_domain.PackageSize": {
-            "type": "string",
-            "enum": [
-                "S",
-                "M",
-                "L"
-            ],
-            "x-enum-varnames": [
-                "SizeS",
-                "SizeM",
-                "SizeL"
+                "OrderCreated",
+                "OrderCollected",
+                "OrderInStation",
+                "OrderInRoute",
+                "OrderDelivered",
+                "OrderCancelled"
             ]
         },
         "logistics-app_backend_internal_domain.Role": {
