@@ -11,29 +11,269 @@
     },
     "basePath": "/api",
     "paths": {
-        "/admin/orders": {
+        "/addresses": {
             "get": {
                 "security": [
                     {
                         "BearerAuth": []
                     }
                 ],
-                "description": "Returns all orders (admin only)",
+                "description": "Clients see only their addresses (active by default). Admins can pass ?all=1 to see all, and ?include_inactive=1 to include inactive.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
-                    "admin"
+                    "addresses"
                 ],
-                "summary": "Get all orders",
+                "summary": "List addresses",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Admin only: if set to 1, list all users' addresses",
+                        "name": "all",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Admin only: if set to 1, include inactive addresses",
+                        "name": "include_inactive",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
-                        "description": "List of all orders",
+                        "description": "OK",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/logistics-app_backend_internal_domain.Order"
+                                "$ref": "#/definitions/logistics-app_backend_internal_domain.Address"
                             }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Creates coordinates first if provided, then address; CustomerID is set from JWT. Clients create their own; admins can also create for themselves only in this endpoint.",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "addresses"
+                ],
+                "summary": "Create address (with coordinates)",
+                "parameters": [
+                    {
+                        "description": "Address with optional coordinates",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "city": {
+                                    "type": "string"
+                                },
+                                "coordinates": {
+                                    "type": "object",
+                                    "properties": {
+                                        "latitude": {
+                                            "type": "number"
+                                        },
+                                        "longitude": {
+                                            "type": "number"
+                                        }
+                                    }
+                                },
+                                "country": {
+                                    "type": "string"
+                                },
+                                "exterior_number": {
+                                    "type": "string"
+                                },
+                                "interior_number": {
+                                    "type": "string"
+                                },
+                                "neighborhood": {
+                                    "type": "string"
+                                },
+                                "postal_code": {
+                                    "type": "string"
+                                },
+                                "state": {
+                                    "type": "string"
+                                },
+                                "street": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "201": {
+                        "description": "Created",
+                        "schema": {
+                            "$ref": "#/definitions/logistics-app_backend_internal_domain.Address"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/addresses/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "addresses"
+                ],
+                "summary": "Get single address",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Address ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/logistics-app_backend_internal_domain.Address"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "addresses"
+                ],
+                "summary": "Update address (and coordinates)",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Address ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Address update",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "city": {
+                                    "type": "string"
+                                },
+                                "coordinates": {
+                                    "type": "object",
+                                    "properties": {
+                                        "latitude": {
+                                            "type": "number"
+                                        },
+                                        "longitude": {
+                                            "type": "number"
+                                        }
+                                    }
+                                },
+                                "country": {
+                                    "type": "string"
+                                },
+                                "exterior_number": {
+                                    "type": "string"
+                                },
+                                "interior_number": {
+                                    "type": "string"
+                                },
+                                "is_active": {
+                                    "type": "boolean"
+                                },
+                                "neighborhood": {
+                                    "type": "string"
+                                },
+                                "postal_code": {
+                                    "type": "string"
+                                },
+                                "state": {
+                                    "type": "string"
+                                },
+                                "street": {
+                                    "type": "string"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/logistics-app_backend_internal_domain.Address"
+                        }
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "string"
                         }
                     },
                     "401": {
@@ -47,9 +287,109 @@
                         "schema": {
                             "type": "string"
                         }
+                    }
+                }
+            },
+            "delete": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Deletes address only if it is not referenced by any order. Owner or admin only.",
+                "tags": [
+                    "addresses"
+                ],
+                "summary": "Delete address",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Address ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No content"
                     },
-                    "500": {
-                        "description": "Internal server error",
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/addresses/{id}/active": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "addresses"
+                ],
+                "summary": "Set Address active status",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Address ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Desired active state",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "active": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
                         "schema": {
                             "type": "string"
                         }
@@ -129,18 +469,18 @@
                         "BearerAuth": []
                     }
                 ],
-                "description": "Returns orders for authenticated user",
+                "description": "Clients see only their orders. Admins can see all orders by passing ?all=1.",
                 "produces": [
                     "application/json"
                 ],
                 "tags": [
                     "orders"
                 ],
-                "summary": "Get user orders",
+                "summary": "List orders",
                 "parameters": [
                     {
                         "type": "string",
-                        "description": "Get all orders (admin only)",
+                        "description": "If set to 1 and requester is admin, returns all orders; otherwise returns only own orders",
                         "name": "all",
                         "in": "query"
                     }
@@ -294,6 +634,111 @@
                 }
             }
         },
+        "/package-types": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns package types. If ?all=1 and requester is admin, includes inactive; otherwise only active.",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "package_types"
+                ],
+                "summary": "List package types",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "If set to 1 and requester is admin, returns active and inactive",
+                        "name": "all",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/logistics-app_backend_internal_domain.PackageType"
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
+        "/package-types/{id}/active": {
+            "patch": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Admin only. Sets is_active true/false for a PackageType",
+                "consumes": [
+                    "application/json"
+                ],
+                "tags": [
+                    "package_types"
+                ],
+                "summary": "Set PackageType active status",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "PackageType ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "Desired active state",
+                        "name": "request",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "object",
+                            "properties": {
+                                "active": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No content"
+                    },
+                    "400": {
+                        "description": "Bad request",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/users": {
             "post": {
                 "description": "Creates a new user account",
@@ -399,6 +844,53 @@
         }
     },
     "definitions": {
+        "logistics-app_backend_internal_domain.Address": {
+            "type": "object",
+            "properties": {
+                "city": {
+                    "type": "string"
+                },
+                "coordinate_id": {
+                    "type": "integer"
+                },
+                "country": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "customer_id": {
+                    "type": "integer"
+                },
+                "exterior_number": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "interior_number": {
+                    "type": "string"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "neighborhood": {
+                    "type": "string"
+                },
+                "postal_code": {
+                    "type": "string"
+                },
+                "state": {
+                    "type": "string"
+                },
+                "street": {
+                    "type": "string"
+                },
+                "updated_at": {
+                    "type": "string"
+                }
+            }
+        },
         "logistics-app_backend_internal_domain.Order": {
             "type": "object",
             "properties": {
@@ -464,6 +956,44 @@
                 "OrderDelivered",
                 "OrderCancelled"
             ]
+        },
+        "logistics-app_backend_internal_domain.PackageSize": {
+            "type": "string",
+            "enum": [
+                "S",
+                "M",
+                "L",
+                "XL"
+            ],
+            "x-enum-varnames": [
+                "PackageS",
+                "PackageM",
+                "PackageL",
+                "PackageXL"
+            ]
+        },
+        "logistics-app_backend_internal_domain.PackageType": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "type": "string"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "is_active": {
+                    "type": "boolean"
+                },
+                "max_weight_kg": {
+                    "type": "number"
+                },
+                "size_code": {
+                    "$ref": "#/definitions/logistics-app_backend_internal_domain.PackageSize"
+                }
+            }
         },
         "logistics-app_backend_internal_domain.Role": {
             "type": "string",

@@ -12,7 +12,7 @@ export type Toast = { id: number; type: "success" | "danger" | "info" | "warning
 
 type AuthContextType = AuthState & {
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, fullName: string, phone: string) => Promise<void>;
   logout: () => void;
   notify: (toast: Omit<Toast, "id">) => void;
   toasts: Toast[];
@@ -66,14 +66,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setEmail(email);
     localStorage.setItem("auth_token", data.token);
     localStorage.setItem("auth_email", email);
-    notify({ type: "success", message: "Has iniciado sesión" });
-  }, [notify]);
+  }, []);
 
-  const register = useCallback(async (email: string, password: string) => {
+  const register = useCallback(async (email: string, password: string, fullName: string, phone: string) => {
     const res = await fetch(`${API_BASE}/api/users`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password, role: "client" }),
+      body: JSON.stringify({ email, password, full_name: fullName, phone, role: "client" }),
     });
     if (!res.ok) {
       const msg = await res.text();
@@ -88,8 +87,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setEmail(null);
     localStorage.removeItem("auth_token");
     localStorage.removeItem("auth_email");
-    notify({ type: "info", message: "Sesión cerrada" });
-  }, [notify]);
+  }, []);
 
   const value = useMemo<AuthContextType>(
     () => ({ token, email, isAuthenticated, login, register, logout, notify, toasts, removeToast }),

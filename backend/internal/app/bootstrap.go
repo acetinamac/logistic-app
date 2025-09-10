@@ -64,7 +64,11 @@ func Bootstrap(r *mux.Router) error {
 	orderSvc := usecase.NewOrderService(orderRepo)
 	userRepo := repository.NewUserGormRepo(database)
 	userSvc := usecase.NewUserService(userRepo)
-	h := &httpdelivery.Handler{Orders: orderSvc, Users: userSvc}
+	ptRepo := repository.NewPackageTypeGormRepo(database)
+	ptSvc := usecase.NewPackageTypeService(ptRepo)
+	addrRepo := repository.NewAddressGormRepo(database)
+	addrSvc := usecase.NewAddressService(addrRepo)
+	h := &httpdelivery.Handler{Orders: orderSvc, Users: userSvc, PackageTypes: ptSvc, Addresses: addrSvc}
 	h.Register(r)
 	log.Println("Bootstrap completed")
 	return nil

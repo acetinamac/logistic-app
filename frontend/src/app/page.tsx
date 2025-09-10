@@ -12,8 +12,8 @@ export default function Home() {
 
   if (!isAuthenticated) {
     return (
-      <div className="container d-flex justify-content-center align-items-start" style={{ minHeight: "calc(100vh - 56px)" }}>
-        <div className="w-100 d-flex justify-content-center" style={{ marginTop: 40 }}>
+      <div className="container-fluid min-vh-100 d-flex align-items-center justify-content-center">
+        <div className="w-100" style={{ maxWidth: 480 }}>
           {!showRegister ? (
             <LoginForm onSwitchToRegister={()=>setShowRegister(true)} />
           ) : (
@@ -25,7 +25,7 @@ export default function Home() {
   }
 
   return (
-    <div className="container-fluid">
+    <div className="container-fluid m-0 p-0">
       <div className="row">
         <div className="col-12 col-md-3 col-lg-2 p-0">
           <Sidebar current={view} onSelect={(v)=>setView(v as any)} />

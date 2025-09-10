@@ -1,5 +1,36 @@
 basePath: /api
 definitions:
+  logistics-app_backend_internal_domain.Address:
+    properties:
+      city:
+        type: string
+      coordinate_id:
+        type: integer
+      country:
+        type: string
+      created_at:
+        type: string
+      customer_id:
+        type: integer
+      exterior_number:
+        type: string
+      id:
+        type: integer
+      interior_number:
+        type: string
+      is_active:
+        type: boolean
+      neighborhood:
+        type: string
+      postal_code:
+        type: string
+      state:
+        type: string
+      street:
+        type: string
+      updated_at:
+        type: string
+    type: object
   logistics-app_backend_internal_domain.Order:
     properties:
       actual_weight_kg:
@@ -47,6 +78,33 @@ definitions:
     - OrderInRoute
     - OrderDelivered
     - OrderCancelled
+  logistics-app_backend_internal_domain.PackageSize:
+    enum:
+    - S
+    - M
+    - L
+    - XL
+    type: string
+    x-enum-varnames:
+    - PackageS
+    - PackageM
+    - PackageL
+    - PackageXL
+  logistics-app_backend_internal_domain.PackageType:
+    properties:
+      created_at:
+        type: string
+      description:
+        type: string
+      id:
+        type: integer
+      is_active:
+        type: boolean
+      max_weight_kg:
+        type: number
+      size_code:
+        $ref: '#/definitions/logistics-app_backend_internal_domain.PackageSize'
+    type: object
   logistics-app_backend_internal_domain.Role:
     enum:
     - client
@@ -86,18 +144,111 @@ info:
   title: Logistics API
   version: "1.0"
 paths:
-  /admin/orders:
+  /addresses:
     get:
-      description: Returns all orders (admin only)
+      description: Clients see only their addresses (active by default). Admins can
+        pass ?all=1 to see all, and ?include_inactive=1 to include inactive.
+      parameters:
+      - description: 'Admin only: if set to 1, list all users'' addresses'
+        in: query
+        name: all
+        type: string
+      - description: 'Admin only: if set to 1, include inactive addresses'
+        in: query
+        name: include_inactive
+        type: string
       produces:
       - application/json
       responses:
         "200":
-          description: List of all orders
+          description: OK
           schema:
             items:
-              $ref: '#/definitions/logistics-app_backend_internal_domain.Order'
+              $ref: '#/definitions/logistics-app_backend_internal_domain.Address'
             type: array
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: List addresses
+      tags:
+      - addresses
+    post:
+      consumes:
+      - application/json
+      description: Creates coordinates first if provided, then address; CustomerID
+        is set from JWT. Clients create their own; admins can also create for themselves
+        only in this endpoint.
+      parameters:
+      - description: Address with optional coordinates
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            city:
+              type: string
+            coordinates:
+              properties:
+                latitude:
+                  type: number
+                longitude:
+                  type: number
+              type: object
+            country:
+              type: string
+            exterior_number:
+              type: string
+            interior_number:
+              type: string
+            neighborhood:
+              type: string
+            postal_code:
+              type: string
+            state:
+              type: string
+            street:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/logistics-app_backend_internal_domain.Address'
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Create address (with coordinates)
+      tags:
+      - addresses
+  /addresses/{id}:
+    delete:
+      description: Deletes address only if it is not referenced by any order. Owner
+        or admin only.
+      parameters:
+      - description: Address ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      responses:
+        "204":
+          description: No content
+        "400":
+          description: Bad request
+          schema:
+            type: string
         "401":
           description: Unauthorized
           schema:
@@ -106,15 +257,142 @@ paths:
           description: Forbidden
           schema:
             type: string
-        "500":
-          description: Internal server error
+      security:
+      - BearerAuth: []
+      summary: Delete address
+      tags:
+      - addresses
+    get:
+      parameters:
+      - description: Address ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/logistics-app_backend_internal_domain.Address'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "404":
+          description: Not found
           schema:
             type: string
       security:
       - BearerAuth: []
-      summary: Get all orders
+      summary: Get single address
       tags:
-      - admin
+      - addresses
+    put:
+      consumes:
+      - application/json
+      parameters:
+      - description: Address ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Address update
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            city:
+              type: string
+            coordinates:
+              properties:
+                latitude:
+                  type: number
+                longitude:
+                  type: number
+              type: object
+            country:
+              type: string
+            exterior_number:
+              type: string
+            interior_number:
+              type: string
+            is_active:
+              type: boolean
+            neighborhood:
+              type: string
+            postal_code:
+              type: string
+            state:
+              type: string
+            street:
+              type: string
+          type: object
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/logistics-app_backend_internal_domain.Address'
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Update address (and coordinates)
+      tags:
+      - addresses
+  /addresses/{id}/active:
+    patch:
+      consumes:
+      - application/json
+      parameters:
+      - description: Address ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Desired active state
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            active:
+              type: boolean
+          type: object
+      responses:
+        "204":
+          description: No content
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Set Address active status
+      tags:
+      - addresses
   /login:
     post:
       consumes:
@@ -159,9 +437,11 @@ paths:
       - auth
   /orders:
     get:
-      description: Returns orders for authenticated user
+      description: Clients see only their orders. Admins can see all orders by passing
+        ?all=1.
       parameters:
-      - description: Get all orders (admin only)
+      - description: If set to 1 and requester is admin, returns all orders; otherwise
+          returns only own orders
         in: query
         name: all
         type: string
@@ -188,7 +468,7 @@ paths:
             type: string
       security:
       - BearerAuth: []
-      summary: Get user orders
+      summary: List orders
       tags:
       - orders
     post:
@@ -266,6 +546,73 @@ paths:
       summary: Update order status
       tags:
       - orders
+  /package-types:
+    get:
+      description: Returns package types. If ?all=1 and requester is admin, includes
+        inactive; otherwise only active.
+      parameters:
+      - description: If set to 1 and requester is admin, returns active and inactive
+        in: query
+        name: all
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/logistics-app_backend_internal_domain.PackageType'
+            type: array
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: List package types
+      tags:
+      - package_types
+  /package-types/{id}/active:
+    patch:
+      consumes:
+      - application/json
+      description: Admin only. Sets is_active true/false for a PackageType
+      parameters:
+      - description: PackageType ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Desired active state
+        in: body
+        name: request
+        required: true
+        schema:
+          properties:
+            active:
+              type: boolean
+          type: object
+      responses:
+        "204":
+          description: No content
+        "400":
+          description: Bad request
+          schema:
+            type: string
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Set PackageType active status
+      tags:
+      - package_types
   /users:
     post:
       consumes:

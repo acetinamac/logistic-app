@@ -16,8 +16,10 @@ import (
 )
 
 type Handler struct {
-	Orders *usecase.OrderService
-	Users  *usecase.UserService
+	Orders       *usecase.OrderService
+	Users        *usecase.UserService
+	PackageTypes *usecase.PackageTypeService
+	Addresses    *usecase.AddressService
 }
 
 type claims struct {
@@ -39,10 +41,19 @@ func (h *Handler) Register(r *mux.Router) {
 	// Users
 	r.HandleFunc("/api/users", h.RegisterUser).Methods(http.MethodPost)
 	r.HandleFunc("/api/users/{id}", h.DeleteUser).Methods(http.MethodDelete)
+	// Package Types
+	r.HandleFunc("/api/package-types", h.ListPackageTypes).Methods(http.MethodGet)
+	r.HandleFunc("/api/package-types/{id}/active", h.SetPackageTypeActive).Methods(http.MethodPatch)
+	// Addresses
+	r.HandleFunc("/api/addresses", h.CreateAddress).Methods(http.MethodPost)
+	r.HandleFunc("/api/addresses", h.ListAddresses).Methods(http.MethodGet)
+	r.HandleFunc("/api/addresses/{id}", h.GetAddress).Methods(http.MethodGet)
+	r.HandleFunc("/api/addresses/{id}", h.UpdateAddress).Methods(http.MethodPut)
+	r.HandleFunc("/api/addresses/{id}", h.DeleteAddress).Methods(http.MethodDelete)
+	r.HandleFunc("/api/addresses/{id}/active", h.SetAddressActive).Methods(http.MethodPatch)
 	// Orders
 	r.HandleFunc("/api/orders", h.CreateOrder).Methods(http.MethodPost)
 	r.HandleFunc("/api/orders", h.MyOrders).Methods(http.MethodGet)
-	r.HandleFunc("/api/admin/orders", h.AllOrders).Methods(http.MethodGet)
 	r.HandleFunc("/api/orders/{id}/status", h.UpdateStatus).Methods(http.MethodPatch)
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200); _, _ = w.Write([]byte("ok")) }).Methods(http.MethodGet)
 }
@@ -196,12 +207,12 @@ func (h *Handler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	_ = json.NewEncoder(w).Encode(o)
 }
 
-// MyOrders godoc
-// @Summary Get user orders
-// @Description Returns orders for authenticated user
+// Orders list godoc
+// @Summary List orders
+// @Description Clients see only their orders. Admins can see all orders by passing ?all=1.
 // @Tags orders
 // @Produce json
-// @Param all query string false "Get all orders (admin only)"
+// @Param all query string false "If set to 1 and requester is admin, returns all orders; otherwise returns only own orders"
 // @Success 200 {array} domain.Order "List of orders"
 // @Failure 401 {string} string "Unauthorized"
 // @Failure 403 {string} string "Forbidden"
@@ -227,35 +238,6 @@ func (h *Handler) MyOrders(w http.ResponseWriter, r *http.Request) {
 	} else {
 		orders, err = h.Orders.FindByCustomer(uid)
 	}
-	if err != nil {
-		http.Error(w, err.Error(), 500)
-		return
-	}
-	_ = json.NewEncoder(w).Encode(orders)
-}
-
-// AllOrders godoc
-// @Summary Get all orders
-// @Description Returns all orders (admin only)
-// @Tags admin
-// @Produce json
-// @Success 200 {array} domain.Order "List of all orders"
-// @Failure 401 {string} string "Unauthorized"
-// @Failure 403 {string} string "Forbidden"
-// @Failure 500 {string} string "Internal server error"
-// @Security BearerAuth
-// @Router /admin/orders [get]
-func (h *Handler) AllOrders(w http.ResponseWriter, r *http.Request) {
-	_, role, ok := auth(r)
-	if !ok {
-		http.Error(w, "unauthorized", 401)
-		return
-	}
-	if role != domain.RoleAdmin {
-		http.Error(w, "forbidden", 403)
-		return
-	}
-	orders, err := h.Orders.FindAll()
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
@@ -296,6 +278,258 @@ func (h *Handler) UpdateStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if err := h.Orders.UpdateStatus(uint(id64), body.Status, uid); err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+	w.WriteHeader(204)
+}
+
+// ListPackageTypes godoc
+// @Summary List package types
+// @Description Returns package types. If ?all=1 and requester is admin, includes inactive; otherwise only active.
+// @Tags package_types
+// @Produce json
+// @Param all query string false "If set to 1 and requester is admin, returns active and inactive"
+// @Success 200 {array} domain.PackageType
+// @Failure 401 {string} string "Unauthorized"
+// @Security BearerAuth
+// @Router /package-types [get]
+func (h *Handler) ListPackageTypes(w http.ResponseWriter, r *http.Request) {
+	_, role, ok := auth(r)
+	if !ok {
+		http.Error(w, "unauthorized", 401)
+		return
+	}
+	includeInactive := false
+	if role == domain.RoleAdmin && r.URL.Query().Get("all") == "1" {
+		includeInactive = true
+	}
+	list, err := h.PackageTypes.List(includeInactive)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	_ = json.NewEncoder(w).Encode(list)
+}
+
+// SetPackageTypeActive godoc
+// @Summary Set PackageType active status
+// @Description Admin only. Sets is_active true/false for a PackageType
+// @Tags package_types
+// @Accept json
+// @Param id path integer true "PackageType ID"
+// @Param request body object{active=boolean} true "Desired active state"
+// @Success 204 "No content"
+// @Failure 400 {string} string "Bad request"
+// @Failure 401 {string} string "Unauthorized"
+// @Failure 403 {string} string "Forbidden"
+// @Security BearerAuth
+// @Router /package-types/{id}/active [patch]
+func (h *Handler) SetPackageTypeActive(w http.ResponseWriter, r *http.Request) {
+	_, role, ok := auth(r)
+	if !ok {
+		http.Error(w, "unauthorized", 401)
+		return
+	}
+	if role != domain.RoleAdmin {
+		http.Error(w, "forbidden", 403)
+		return
+	}
+	idStr := mux.Vars(r)["id"]
+	id64, _ := strconv.ParseUint(idStr, 10, 64)
+	var body struct {
+		Active bool `json:"active"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+	if err := h.PackageTypes.ToggleActive(uint(id64), body.Active); err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+	w.WriteHeader(204)
+}
+
+// Addresses Handlers
+// CreateAddress
+// @Summary Create address (with coordinates)
+// @Description Creates coordinates first if provided, then address; CustomerID is set from JWT. Clients create their own; admins can also create for themselves only in this endpoint.
+// @Tags addresses
+// @Accept json
+// @Produce json
+// @Param request body object{street=string,exterior_number=string,interior_number=string,neighborhood=string,postal_code=string,city=string,state=string,country=string,coordinates=object{latitude=number,longitude=number}} true "Address with optional coordinates"
+// @Success 201 {object} domain.Address
+// @Failure 400 {string} string "Bad request"
+// @Failure 401 {string} string "Unauthorized"
+// @Security BearerAuth
+// @Router /addresses [post]
+func (h *Handler) CreateAddress(w http.ResponseWriter, r *http.Request) {
+	uid, role, ok := auth(r)
+	if !ok {
+		http.Error(w, "unauthorized", 401)
+		return
+	}
+	if role != domain.RoleClient && role != domain.RoleAdmin {
+		http.Error(w, "forbidden", 403)
+		return
+	}
+	var req usecase.AddressRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+	addr, _, err := h.Addresses.Create(uid, req)
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+	w.WriteHeader(201)
+	_ = json.NewEncoder(w).Encode(addr)
+}
+
+// ListAddresses
+// @Summary List addresses
+// @Description Clients see only their addresses (active by default). Admins can pass ?all=1 to see all, and ?include_inactive=1 to include inactive.
+// @Tags addresses
+// @Produce json
+// @Param all query string false "Admin only: if set to 1, list all users' addresses"
+// @Param include_inactive query string false "Admin only: if set to 1, include inactive addresses"
+// @Success 200 {array} domain.Address
+// @Failure 401 {string} string "Unauthorized"
+// @Security BearerAuth
+// @Router /addresses [get]
+func (h *Handler) ListAddresses(w http.ResponseWriter, r *http.Request) {
+	uid, role, ok := auth(r)
+	if !ok {
+		http.Error(w, "unauthorized", 401)
+		return
+	}
+	includeInactive := role == domain.RoleAdmin && r.URL.Query().Get("include_inactive") == "1"
+	all := role == domain.RoleAdmin && r.URL.Query().Get("all") == "1"
+	list, err := h.Addresses.List(uid, role, includeInactive, all)
+	if err != nil {
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	_ = json.NewEncoder(w).Encode(list)
+}
+
+// GetAddress
+// @Summary Get single address
+// @Tags addresses
+// @Produce json
+// @Param id path integer true "Address ID"
+// @Success 200 {object} domain.Address
+// @Failure 401 {string} string "Unauthorized"
+// @Failure 404 {string} string "Not found"
+// @Security BearerAuth
+// @Router /addresses/{id} [get]
+func (h *Handler) GetAddress(w http.ResponseWriter, r *http.Request) {
+	uid, role, ok := auth(r)
+	if !ok {
+		http.Error(w, "unauthorized", 401)
+		return
+	}
+	idStr := mux.Vars(r)["id"]
+	id64, _ := strconv.ParseUint(idStr, 10, 64)
+	isAdmin := role == domain.RoleAdmin
+	a, err := h.Addresses.Get(uid, isAdmin, uint(id64))
+	if err != nil {
+		http.Error(w, err.Error(), 404)
+		return
+	}
+	_ = json.NewEncoder(w).Encode(a)
+}
+
+// UpdateAddress
+// @Summary Update address (and coordinates)
+// @Tags addresses
+// @Accept json
+// @Produce json
+// @Param id path integer true "Address ID"
+// @Param request body object{street=string,exterior_number=string,interior_number=string,neighborhood=string,postal_code=string,city=string,state=string,country=string,is_active=boolean,coordinates=object{latitude=number,longitude=number}} true "Address update"
+// @Success 200 {object} domain.Address
+// @Failure 400 {string} string "Bad request"
+// @Failure 401 {string} string "Unauthorized"
+// @Failure 403 {string} string "Forbidden"
+// @Security BearerAuth
+// @Router /addresses/{id} [put]
+func (h *Handler) UpdateAddress(w http.ResponseWriter, r *http.Request) {
+	uid, role, ok := auth(r)
+	if !ok {
+		http.Error(w, "unauthorized", 401)
+		return
+	}
+	idStr := mux.Vars(r)["id"]
+	id64, _ := strconv.ParseUint(idStr, 10, 64)
+	var req usecase.AddressRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+	addr, _, err := h.Addresses.Update(uid, role == domain.RoleAdmin, uint(id64), req)
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+	_ = json.NewEncoder(w).Encode(addr)
+}
+
+// DeleteAddress
+// @Summary Delete address
+// @Description Deletes address only if it is not referenced by any order. Owner or admin only.
+// @Tags addresses
+// @Param id path integer true "Address ID"
+// @Success 204 "No content"
+// @Failure 400 {string} string "Bad request"
+// @Failure 401 {string} string "Unauthorized"
+// @Failure 403 {string} string "Forbidden"
+// @Security BearerAuth
+// @Router /addresses/{id} [delete]
+func (h *Handler) DeleteAddress(w http.ResponseWriter, r *http.Request) {
+	uid, role, ok := auth(r)
+	if !ok {
+		http.Error(w, "unauthorized", 401)
+		return
+	}
+	idStr := mux.Vars(r)["id"]
+	id64, _ := strconv.ParseUint(idStr, 10, 64)
+	if err := h.Addresses.Delete(uid, role == domain.RoleAdmin, uint(id64)); err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+	w.WriteHeader(204)
+}
+
+// SetAddressActive
+// @Summary Set Address active status
+// @Tags addresses
+// @Accept json
+// @Param id path integer true "Address ID"
+// @Param request body object{active=boolean} true "Desired active state"
+// @Success 204 "No content"
+// @Failure 400 {string} string "Bad request"
+// @Failure 401 {string} string "Unauthorized"
+// @Failure 403 {string} string "Forbidden"
+// @Security BearerAuth
+// @Router /addresses/{id}/active [patch]
+func (h *Handler) SetAddressActive(w http.ResponseWriter, r *http.Request) {
+	uid, role, ok := auth(r)
+	if !ok {
+		http.Error(w, "unauthorized", 401)
+		return
+	}
+	idStr := mux.Vars(r)["id"]
+	id64, _ := strconv.ParseUint(idStr, 10, 64)
+	var body struct {
+		Active bool `json:"active"`
+	}
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+	if err := h.Addresses.ToggleActive(uid, role == domain.RoleAdmin, uint(id64), body.Active); err != nil {
 		http.Error(w, err.Error(), 400)
 		return
 	}
