@@ -41,18 +41,23 @@ func (s *OrderService) Create(o *domain.Order) error {
 	if o.OriginAddressID == 0 || o.DestinationAddressID == 0 {
 		return errors.New("origin_address_id y destination_address_id son requeridos")
 	}
+
 	if o.OriginAddressID == o.DestinationAddressID {
 		return errors.New("origin y destination deben ser diferentes")
 	}
+
 	if o.PackageTypeID == 0 {
 		return errors.New("package_type_id es requerido")
 	}
+
 	if o.CustomerID == 0 || o.CreatedBy == 0 {
 		return errors.New("customer_id y created_by son requeridos")
 	}
+
 	if o.OrderNumber == "" {
 		o.OrderNumber = generateOrderNumber(time.Now())
 	}
+
 	if o.Status == "" {
 		o.Status = domain.OrderCreated
 	}

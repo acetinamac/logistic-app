@@ -111,8 +111,8 @@ const MainContent: React.FC = () => {
       <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
         <h2 className="m-0">Ordenes disponibles</h2>
         <div className="d-flex align-items-center gap-2">
-            <button className="btn btn-sm btn-secondary" onClick={fetchOrders} disabled={loading}>
-                {loading ? "Cargando..." : " Crear Orden "}
+            <button className="btn btn-sm btn-secondary">
+                {" Crear Orden "}
             </button>
             <button className="btn btn-sm btn-outline-secondary" onClick={fetchOrders} disabled={loading}>
                 {loading ? "Cargando..." : " Refrescar "}
