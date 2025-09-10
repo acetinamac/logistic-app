@@ -3,7 +3,7 @@ import React from "react";
 import { useAuth } from "../components/features/auth/AuthContext";
 import LoginForm from "../components/features/auth/LoginForm";
 import RegisterForm from "../components/features/auth/RegisterForm";
-import MainContent from "../components/layout/MainContent";
+import MainContent from "../components/features/dashboard/MainContent";
 
 export default function Home() {
   const { isAuthenticated } = useAuth();

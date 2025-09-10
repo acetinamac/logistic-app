@@ -2,8 +2,8 @@
 import React from "react";
 import { DataGrid, type Column } from "react-data-grid";
 import "react-data-grid/lib/styles.css";
-import { API_BASE } from "../../lib/constants";
-import { useAuth } from "../features/auth/AuthContext";
+import { API_BASE } from "../../../lib/constants";
+import { useAuth } from "../auth/AuthContext";
 
 // Types that match the backend DTO structure
 export type OrderRow = {
