@@ -578,6 +578,42 @@ const docTemplate = `{
                 }
             }
         },
+        "/orders/status": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns all available order status constants",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Get available order statuses",
+                "responses": {
+                    "200": {
+                        "description": "List of order statuses",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "object",
+                                "properties": {
+                                    "label": {
+                                        "type": "string"
+                                    },
+                                    "value": {
+                                        "type": "string"
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        },
         "/orders/{id}/status": {
             "patch": {
                 "security": [
@@ -959,6 +995,9 @@ const docTemplate = `{
                 },
                 "full_name": {
                     "type": "string"
+                },
+                "id": {
+                    "type": "integer"
                 },
                 "order_number": {
                     "type": "string"

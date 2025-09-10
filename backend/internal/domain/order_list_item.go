@@ -8,6 +8,7 @@ package domain
 // Note: field tags map to JSON response keys
 
 type OrderListItem struct {
+	ID                     uint        `json:"id"`
 	OrderNumber            string      `json:"order_number"`
 	CreatedAt              string      `json:"created_at"`
 	FullName               string      `json:"full_name"`

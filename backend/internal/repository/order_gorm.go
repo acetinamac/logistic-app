@@ -43,6 +43,7 @@ func (r *OrderGormRepo) FindAll() ([]domain.Order, error) {
 // internal struct for scanning joined rows
 // We will compute the final strings in Go to avoid DB-specific functions
 type orderJoinedRow struct {
+	Id             uint
 	OrderNumber    string
 	CreatedAt      time.Time
 	FullName       string
@@ -64,7 +65,7 @@ type orderJoinedRow struct {
 func (r *OrderGormRepo) findJoined(base *gorm.DB) ([]domain.OrderListItem, error) {
 	var rows []orderJoinedRow
 	q := base.Table("orders as o").
-		Select("o.order_number, o.created_at, u.full_name, ao.street as ao_street, ao.exterior_number as ao_exterior, ao.neighborhood as ao_neighborhood, ao.city as ao_city, ao.postal_code as ao_postal, ad.street as ad_street, ad.exterior_number as ad_exterior, ad.neighborhood as ad_neighborhood, ad.city as ad_city, ad.postal_code as ad_postal, o.actual_weight_kg, pt.size_code, o.status").
+		Select("o.id, o.order_number, o.created_at, u.full_name, ao.street as ao_street, ao.exterior_number as ao_exterior, ao.neighborhood as ao_neighborhood, ao.city as ao_city, ao.postal_code as ao_postal, ad.street as ad_street, ad.exterior_number as ad_exterior, ad.neighborhood as ad_neighborhood, ad.city as ad_city, ad.postal_code as ad_postal, o.actual_weight_kg, pt.size_code, o.status").
 		Joins("inner join users u on o.customer_id = u.id").
 		Joins("inner join addresses ao on o.origin_address_id = ao.id").
 		Joins("inner join addresses ad on o.destination_address_id = ad.id").
@@ -78,6 +79,7 @@ func (r *OrderGormRepo) findJoined(base *gorm.DB) ([]domain.OrderListItem, error
 		origin := strings.TrimSpace(strings.Join([]string{rrow.AOStreet, rrow.AOExterior, rrow.AONeighborhood, rrow.AOCity, rrow.AOPostal}, " "))
 		dest := strings.TrimSpace(strings.Join([]string{rrow.ADStreet, rrow.ADExterior, rrow.ADNeighborhood, rrow.ADCity, rrow.ADPostal}, " "))
 		item := domain.OrderListItem{
+			ID:                     rrow.Id,
 			OrderNumber:            rrow.OrderNumber,
 			CreatedAt:              rrow.CreatedAt.Format("02/01/2006"),
 			FullName:               rrow.FullName,

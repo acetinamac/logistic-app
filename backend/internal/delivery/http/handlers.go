@@ -54,7 +54,9 @@ func (h *Handler) Register(r *mux.Router) {
 	// Orders
 	r.HandleFunc("/api/orders", h.CreateOrder).Methods(http.MethodPost)
 	r.HandleFunc("/api/orders", h.MyOrders).Methods(http.MethodGet)
+	r.HandleFunc("/api/orders/status", h.GetOrderStatuses).Methods(http.MethodGet)
 	r.HandleFunc("/api/orders/{id}/status", h.UpdateStatus).Methods(http.MethodPatch)
+
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200); _, _ = w.Write([]byte("ok")) }).Methods(http.MethodGet)
 }
 
@@ -534,6 +536,32 @@ func (h *Handler) SetAddressActive(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(204)
+}
+
+// GetOrderStatuses godoc
+// @Summary Get available order statuses
+// @Description Returns all available order status constants
+// @Tags orders
+// @Produce json
+// @Success 200 {array} object{value=string,label=string} "List of order statuses"
+// @Security BearerAuth
+// @Router /orders/status [get]
+func (h *Handler) GetOrderStatuses(w http.ResponseWriter, r *http.Request) {
+	_, _, ok := auth(r)
+	if !ok {
+		http.Error(w, "unauthorized", 401)
+		return
+	}
+
+	statuses := []map[string]string{
+		{"value": string(domain.OrderCreated), "label": "Creado"},
+		{"value": string(domain.OrderCollected), "label": "Recolectado"},
+		{"value": string(domain.OrderInStation), "label": "En Estación"},
+		{"value": string(domain.OrderInRoute), "label": "En Ruta"},
+		{"value": string(domain.OrderDelivered), "label": "Entregado"},
+		{"value": string(domain.OrderCancelled), "label": "Cancelado"},
+	}
+	_ = json.NewEncoder(w).Encode(statuses)
 }
 
 func auth(r *http.Request) (uint, domain.Role, bool) {

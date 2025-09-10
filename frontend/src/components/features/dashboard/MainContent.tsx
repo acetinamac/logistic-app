@@ -7,6 +7,7 @@ import { useAuth } from "../auth/AuthContext";
 
 // Types that match the backend DTO structure
 export type OrderRow = {
+  id: number;
   order_number: string;
   created_at: string; // formatted as DD/MM/YYYY from backend
   full_name: string;
@@ -65,27 +66,28 @@ const MainContent: React.FC = () => {
   // Columns for react-data-grid
   const columns = React.useMemo<readonly Column<OrderRow>[]>(
     () => [
-      { key: "order_number", name: "Orden", resizable: true, width: 110, frozen: true },
-      { key: "created_at", name: "Fecha", resizable: true, width: 110 },
-      { key: "full_name", name: "Cliente", resizable: true, minWidth: 140 },
-      { key: "origin_full_address", name: "Origen", resizable: true, minWidth: 220 },
-      { key: "destination_full_address", name: "Destino", resizable: true, minWidth: 220 },
-      { key: "actual_weight_kg", name: "Peso (kg)", resizable: true, width: 100 },
-      { key: "size_code", name: "Tamaño", resizable: true, width: 90 },
-      { key: "status", name: "Estado", resizable: true, width: 120 },
-      {
-        key: "actions",
-        name: "Acciones",
-        width: 120,
-        frozen: true,
-        renderCell({ row }) {
-          return (
-            <div className="d-flex gap-2">
-              <button className="btn btn-sm btn-outline-primary" title={`Visualizar ${row.order_number}`} onClick={() => { /* placeholder */ }}>
-                Visualizar
-              </button>
-            </div>
-          );
+        {key: "id", name: "Id", resizable: true, width: 110, hidden: true},
+        { key: "order_number", name: "Orden", resizable: true, width: 110, frozen: true },
+        { key: "created_at", name: "Fecha", resizable: true, width: 110 },
+        { key: "full_name", name: "Cliente", resizable: true, minWidth: 140 },
+        { key: "origin_full_address", name: "Origen", resizable: true, minWidth: 220 },
+        { key: "destination_full_address", name: "Destino", resizable: true, minWidth: 220 },
+        { key: "actual_weight_kg", name: "Peso (kg)", resizable: true, width: 100 },
+        { key: "size_code", name: "Tamaño", resizable: true, width: 90 },
+        { key: "status", name: "Estado", resizable: true, width: 120 },
+        {
+            key: "actions",
+            name: "Acciones",
+            width: 120,
+            frozen: true,
+            renderCell({ row }) {
+            return (
+                <div className="d-flex gap-2">
+                    <button className="btn btn-sm btn-outline-primary" title={`Visualizar ${row.order_number}`} onClick={() => { /* placeholder */ }}>
+                    Visualizar
+                    </button>
+                </div>
+            );
         }
       }
     ],
