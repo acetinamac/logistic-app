@@ -32,7 +32,7 @@ const Header: React.FC = () => {
         <header className="navbar navbar-dark px-3 shadow-sm"
                 style={{position: "sticky", top: 0, zIndex: 1030}}>
             <div className="container-fluid">
-                <span className="navbar-brand mb-0 h1 fw-bold">Logistic App</span>
+                <span className="navbar-brand mb-0 h1 fw-bold">Logistic (La Tortuga)</span>
 
                 <div className="d-flex align-items-center">
                     {isAuthenticated && (
@@ -85,7 +85,7 @@ const Header: React.FC = () => {
                                         borderRadius: '8px'
                                     }}
                                 >
-                                    <div className="dropdown-header border-bottom pb-2 mb-2">
+                                    <div className="dropdown-header border-bottom pb-2 mb-1">
                                         <div className="d-flex align-items-center">
                                             <div
                                                 className="rounded-circle bg-primary d-flex align-items-center justify-content-center me-2 text-white fw-bold"
@@ -101,6 +101,24 @@ const Header: React.FC = () => {
                                             </div>
                                         </div>
                                     </div>
+
+                                    <li className="border-bottom">
+                                        <button
+                                            className="dropdown-item d-flex align-items-center py-2 mb-1"
+                                            onClick={() => {/* Aquí iría la función para manejar el perfil */}}
+                                        >
+                                            <svg
+                                                width="16"
+                                                height="16"
+                                                fill="currentColor"
+                                                className="me-2 text-muted"
+                                                viewBox="0 0 16 16"
+                                            >
+                                                <path d="M8 8a3 3 0 1 0 0-6 3 3 0 0 0 0 6Zm2-3a2 2 0 1 1-4 0 2 2 0 0 1 4 0Zm4 8c0 1-1 1-1 1H3s-1 0-1-1 1-4 6-4 6 3 6 4Zm-1-.004c-.001-.246-.154-.986-.832-1.664C11.516 10.68 10.289 10 8 10c-2.29 0-3.516.68-4.168 1.332-.678.678-.83 1.418-.832 1.664h10Z"/>
+                                            </svg>
+                                            Perfil de usuario
+                                        </button>
+                                    </li>
 
                                     <li>
                                         <button
