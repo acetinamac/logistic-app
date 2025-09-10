@@ -4,6 +4,7 @@ import { DataGrid, type Column } from "react-data-grid";
 import "react-data-grid/lib/styles.css";
 import { API_BASE } from "../../../lib/constants";
 import { useAuth } from "../auth/AuthContext";
+import OrderModal from "../../forms/OrderModal";
 
 // Types that match the backend DTO structure
 export type OrderRow = {
@@ -29,6 +30,10 @@ const MainContent: React.FC = () => {
   const [qName, setQName] = React.useState("");
   const [qDate, setQDate] = React.useState(""); // DD/MM/YYYY or partial
   const [qStatus, setQStatus] = React.useState("");
+
+  const [modalOpen, setModalOpen] = React.useState(false);
+  const [modalMode, setModalMode] = React.useState<"create"|"view">("create");
+  const [selectedOrderId, setSelectedOrderId] = React.useState<number | undefined>(undefined);
 
   const fetchOrders = React.useCallback(async () => {
     if (!token) {
@@ -66,7 +71,7 @@ const MainContent: React.FC = () => {
   // Columns for react-data-grid
   const columns = React.useMemo<readonly Column<OrderRow>[]>(
     () => [
-        {key: "id", name: "Id", resizable: true, width: 110, hidden: true},
+        { key: "id", name: "Id", resizable: true, width: 110, hidden: true},
         { key: "order_number", name: "Orden", resizable: true, width: 110, frozen: true },
         { key: "created_at", name: "Fecha", resizable: true, width: 110 },
         { key: "full_name", name: "Cliente", resizable: true, minWidth: 140 },
@@ -83,7 +88,11 @@ const MainContent: React.FC = () => {
             renderCell({ row }) {
             return (
                 <div className="d-flex gap-2">
-                    <button className="btn btn-sm btn-outline-primary" title={`Visualizar ${row.order_number}`} onClick={() => { /* placeholder */ }}>
+                    <button className="btn btn-sm btn-outline-primary" title={`Visualizar ${row.id}`} onClick={() => {
+                      setSelectedOrderId(row.id);
+                      setModalMode("view");
+                      setModalOpen(true);
+                    }}>
                     Visualizar
                     </button>
                 </div>
@@ -113,8 +122,8 @@ const MainContent: React.FC = () => {
       <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
         <h2 className="m-0">Ordenes disponibles</h2>
         <div className="d-flex align-items-center gap-2">
-            <button className="btn btn-sm btn-secondary">
-                {" Crear Orden "}
+            <button className="btn btn-sm btn-secondary" onClick={() => { setModalMode("create"); setSelectedOrderId(undefined); setModalOpen(true); }}>
+                Crear Orden
             </button>
             <button className="btn btn-sm btn-outline-secondary" onClick={fetchOrders} disabled={loading}>
                 {loading ? "Cargando..." : " Refrescar "}
@@ -162,6 +171,14 @@ const MainContent: React.FC = () => {
           />
         </div>
       </div>
+
+      <OrderModal
+        open={modalOpen}
+        mode={modalMode}
+        orderId={selectedOrderId}
+        onClose={() => setModalOpen(false)}
+        onSaved={() => fetchOrders()}
+      />
     </div>
   );
 };

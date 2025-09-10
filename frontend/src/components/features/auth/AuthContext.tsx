@@ -6,6 +6,8 @@ export type AuthState = {
   token: string | null;
   email: string | null;
   isAuthenticated: boolean;
+  userId: number | null;
+  role: "admin" | "client" | "courier" | null;
 };
 
 export type Toast = { id: number; type: "success" | "danger" | "info" | "warning"; message: string; timeout?: number };
@@ -24,12 +26,30 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [token, setToken] = useState<string | null>(null);
   const [email, setEmail] = useState<string | null>(null);
+  const [userId, setUserId] = useState<number | null>(null);
+  const [role, setRole] = useState<"admin" | "client" | "courier" | null>(null);
   const [toasts, setToasts] = useState<Toast[]>([]);
+
+  const decodeJwt = (tkn: string): { uid?: number; role?: "admin"|"client"|"courier" } => {
+    try {
+      const payload = tkn.split(".")[1];
+      const base64 = payload.replace(/-/g, "+").replace(/_/g, "/");
+      const json = JSON.parse(atob(base64));
+      return { uid: json.uid as number, role: json.role as any };
+    } catch {
+      return {};
+    }
+  };
 
   useEffect(() => {
     const t = localStorage.getItem("auth_token");
     const e = localStorage.getItem("auth_email");
-    if (t) setToken(t);
+    if (t) {
+      setToken(t);
+      const info = decodeJwt(t);
+      setUserId(typeof info.uid === "number" ? info.uid : null);
+      setRole((info.role as any) ?? null);
+    }
     if (e) setEmail(e);
   }, []);
 
@@ -66,7 +86,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setEmail(email);
     localStorage.setItem("auth_token", data.token);
     localStorage.setItem("auth_email", email);
-  }, []);
+    const info = decodeJwt(data.token);
+    setUserId(typeof info.uid === "number" ? info.uid : null);
+    setRole((info.role as any) ?? null);
+  }, [notify]);
 
   const register = useCallback(async (email: string, password: string, fullName: string, phone: string) => {
     const res = await fetch(`${API_BASE}/api/users`, {
@@ -85,13 +108,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = useCallback(() => {
     setToken(null);
     setEmail(null);
+    setUserId(null);
+    setRole(null);
     localStorage.removeItem("auth_token");
     localStorage.removeItem("auth_email");
   }, []);
 
   const value = useMemo<AuthContextType>(
-    () => ({ token, email, isAuthenticated, login, register, logout, notify, toasts, removeToast }),
-    [token, email, isAuthenticated, login, register, logout, notify, toasts, removeToast]
+    () => ({ token, email, isAuthenticated, userId, role, login, register, logout, notify, toasts, removeToast }),
+    [token, email, isAuthenticated, userId, role, login, register, logout, notify, toasts, removeToast]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

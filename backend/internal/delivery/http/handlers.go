@@ -54,8 +54,8 @@ func (h *Handler) Register(r *mux.Router) {
 	// Orders
 	r.HandleFunc("/api/orders", h.CreateOrder).Methods(http.MethodPost)
 	r.HandleFunc("/api/orders", h.MyOrders).Methods(http.MethodGet)
+	r.HandleFunc("/api/orders/status", h.GetOrderStatus).Methods(http.MethodGet)
 	r.HandleFunc("/api/orders/{id}", h.GetOrderByID).Methods(http.MethodGet)
-	r.HandleFunc("/api/orders/status", h.GetOrderStatuses).Methods(http.MethodGet)
 	r.HandleFunc("/api/orders/{id}/status", h.UpdateStatus).Methods(http.MethodPatch)
 
 	r.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200); _, _ = w.Write([]byte("ok")) }).Methods(http.MethodGet)
@@ -577,15 +577,15 @@ func (h *Handler) SetAddressActive(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(204)
 }
 
-// GetOrderStatuses godoc
+// GetOrderStatus
 // @Summary Get available order statuses
 // @Description Returns all available order status constants
 // @Tags orders
 // @Produce json
-// @Success 200 {array} object{value=string,label=string} "List of order statuses"
+// @Success 200 {array} object{value=string,label=string} "List of order status"
 // @Security BearerAuth
 // @Router /orders/status [get]
-func (h *Handler) GetOrderStatuses(w http.ResponseWriter, r *http.Request) {
+func (h *Handler) GetOrderStatus(w http.ResponseWriter, r *http.Request) {
 	_, _, ok := auth(r)
 	if !ok {
 		http.Error(w, "unauthorized", 401)
