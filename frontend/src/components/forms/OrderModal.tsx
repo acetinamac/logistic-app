@@ -145,7 +145,19 @@ const OrderModal: React.FC<OrderModalProps> = ({ open, mode, orderId, onClose, o
   React.useEffect(() => {
     if (!open) return;
     fetchBaseData();
-  }, [open, fetchBaseData]);
+    // When opening in create mode, reset form to defaults to avoid stale values
+    if (!isView) {
+      setDetail(null);
+      setForm({
+        actual_weight_kg: 0,
+        origin_address_id: 0,
+        destination_address_id: 0,
+        observations: "",
+        internal_notes: "",
+        status: "created",
+      });
+    }
+  }, [open, fetchBaseData, isView]);
 
   React.useEffect(() => {
     if (open && isView && orderId) {
@@ -186,14 +198,14 @@ const OrderModal: React.FC<OrderModalProps> = ({ open, mode, orderId, onClose, o
         created_at: nowIso,
         created_by: userId,
         customer_id: userId,
-        destination_address_id: form.destination_address_id,
+        destination_address_id: Number(form.destination_address_id),
         id: 0,
         internal_notes: isAdmin ? form.internal_notes : "",
         observations: form.observations,
         order_number: "",
-        origin_address_id: form.origin_address_id,
+        origin_address_id: Number(form.origin_address_id),
         package_type_id: computePackageTypeId(form.actual_weight_kg),
-        status: isAdmin ? form.status : "created",
+        status: "created",
         updated_at: nowIso,
         updated_by: 0
       };
@@ -251,14 +263,13 @@ const OrderModal: React.FC<OrderModalProps> = ({ open, mode, orderId, onClose, o
       <div style={dialogStyle} className="p-3">
         <div className="d-flex align-items-center justify-content-between mb-3">
           <h5 className="m-0">{isView ? `Orden #${detail?.order_number ?? orderId}` : "Crear Orden"}</h5>
-          <button type="button" className="btn btn-sm btn-outline-secondary" onClick={onClose} disabled={saving}>Cerrar</button>
         </div>
 
         {/* Content */}
         <div className="row g-3">
           <div className="col-12 col-md-6">
             <label className="form-label">Dirección Origen</label>
-            <select className="form-select" name="origin_address_id" value={form.origin_address_id}
+              <select className="form-select" name="origin_address_id" value={Number(form.origin_address_id)}
               onChange={onField} disabled={isView}>
               <option value={0}>Selecciona...</option>
               {addresses.map(renderAddressOption)}
@@ -266,7 +277,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ open, mode, orderId, onClose, o
           </div>
           <div className="col-12 col-md-6">
             <label className="form-label">Dirección Destino</label>
-            <select className="form-select" name="destination_address_id" value={form.destination_address_id}
+            <select className="form-select" name="destination_address_id" value={Number(form.destination_address_id)}
               onChange={onField} disabled={isView}>
               <option value={0}>Selecciona...</option>
               {addresses.map(renderAddressOption)}
@@ -280,7 +291,7 @@ const OrderModal: React.FC<OrderModalProps> = ({ open, mode, orderId, onClose, o
           </div>
           <div className="col-12 col-md-8">
             <label className="form-label">Tipo de Paquete</label>
-            <input className="form-control" value={selectedPkg ? `${selectedPkg.size_code} - ${selectedPkg.description}` : "—"} readOnly />
+            <input className="form-control form-control-plaintext bg-transparent" style={{border:0}} value={selectedPkg ? `${selectedPkg.size_code} - ${selectedPkg.description}` : "—"} readOnly tabIndex={-1} />
             <div className="form-text">Se calcula automáticamente según el peso y se envía como id.</div>
           </div>
 
@@ -300,30 +311,38 @@ const OrderModal: React.FC<OrderModalProps> = ({ open, mode, orderId, onClose, o
 
           <div className="col-12 col-md-6">
             <label className="form-label">Estatus</label>
-            <select className="form-select" name="status" value={form.status} onChange={onField} disabled={!isAdmin || (isView && !isAdmin)}>
-              {statusOptions.map(s => (
-                <option key={s.value} value={s.value}>{s.label}</option>
-              ))}
-            </select>
+            {!isView && (
+              <input className="form-control form-control-plaintext bg-transparent" style={{border:0}} readOnly tabIndex={-1} value="Creado" />
+            )}
+            {isView && isAdmin && (
+              <select className="form-select" name="status" value={form.status} onChange={onField}>
+                {statusOptions.map(s => (
+                  <option key={s.value} value={s.value}>{s.label}</option>
+                ))}
+              </select>
+            )}
+            {isView && !isAdmin && (
+              <input className="form-control form-control-plaintext bg-transparent" style={{border:0}} readOnly tabIndex={-1} value={statusOptions.find(s=>s.value===form.status)?.label || form.status} />
+            )}
             {!isAdmin && <div className="form-text">Al crear será "Creado". Solo un admin puede modificarlo.</div>}
           </div>
 
           {isView && detail && (
             <div className="col-12 col-md-6">
               <label className="form-label">Fecha de creación</label>
-              <input className="form-control" value={detail.created_at} readOnly />
+              <input className="form-control form-control-plaintext bg-transparent" style={{border:0}} value={detail.created_at} readOnly tabIndex={-1} />
             </div>
           )}
         </div>
 
         <div className="d-flex justify-content-end gap-2 mt-4">
           {!isView && (
-            <button className="btn btn-primary" onClick={handleCreate} disabled={saving || loading}>Guardar</button>
+            <button className="btn btn-sm btn-secondary" onClick={handleCreate} disabled={saving || loading}>Guardar</button>
           )}
           {isView && isAdmin && (
-            <button className="btn btn-primary" onClick={handlePatchStatus} disabled={saving || loading}>Guardar estatus</button>
+            <button className="btn btn-sm btn-secondary" onClick={handlePatchStatus} disabled={saving || loading}>Guardar estatus</button>
           )}
-          <button className="btn btn-outline-secondary" onClick={onClose} disabled={saving}>Cerrar</button>
+          <button className="btn btn-sm btn-outline-secondary" onClick={onClose} disabled={saving}>Cerrar</button>
         </div>
       </div>
     </div>
