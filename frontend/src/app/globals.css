@@ -37,3 +37,15 @@ header {
     background-color: #5855eb;
     border-color: #5855eb;
 }
+
+.btn-secondary {
+    background-color: var(--bs-primary);
+    border-color: var(--bs-primary);
+    border-radius: 8px;
+    font-weight: 500;
+}
+
+.btn-secondary:hover {
+    background-color: #5855eb;
+    border-color: #5855eb;
+}
