@@ -13,6 +13,8 @@ type OrderRepo interface {
 	FindByCustomer(customerID uint) ([]domain.Order, error)
 	FindAll() ([]domain.Order, error)
 	UpdateStatus(id uint, status domain.OrderStatus, changedBy uint) error
+	FindJoinedByCustomer(customerID uint) ([]domain.OrderListItem, error)
+	FindJoinedAll() ([]domain.OrderListItem, error)
 }
 
 type OrderService struct{ repo OrderRepo }
@@ -22,6 +24,13 @@ func NewOrderService(r OrderRepo) *OrderService { return &OrderService{repo: r} 
 func (s *OrderService) FindAll() ([]domain.Order, error) { return s.repo.FindAll() }
 func (s *OrderService) FindByCustomer(customerID uint) ([]domain.Order, error) {
 	return s.repo.FindByCustomer(customerID)
+}
+
+func (s *OrderService) ListJoinedAll() ([]domain.OrderListItem, error) {
+	return s.repo.FindJoinedAll()
+}
+func (s *OrderService) ListJoinedByCustomer(customerID uint) ([]domain.OrderListItem, error) {
+	return s.repo.FindJoinedByCustomer(customerID)
 }
 
 func generateOrderNumber(t time.Time) string {

@@ -487,11 +487,11 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "List of orders",
+                        "description": "List of orders with details",
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/logistics-app_backend_internal_domain.Order"
+                                "$ref": "#/definitions/logistics-app_backend_internal_domain.OrderListItem"
                             }
                         }
                     },
@@ -935,6 +935,35 @@
                 },
                 "updated_by": {
                     "type": "integer"
+                }
+            }
+        },
+        "logistics-app_backend_internal_domain.OrderListItem": {
+            "type": "object",
+            "properties": {
+                "actual_weight_kg": {
+                    "type": "number"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "destination_full_address": {
+                    "type": "string"
+                },
+                "full_name": {
+                    "type": "string"
+                },
+                "order_number": {
+                    "type": "string"
+                },
+                "origin_full_address": {
+                    "type": "string"
+                },
+                "size_code": {
+                    "$ref": "#/definitions/logistics-app_backend_internal_domain.PackageSize"
+                },
+                "status": {
+                    "$ref": "#/definitions/logistics-app_backend_internal_domain.OrderStatus"
                 }
             }
         },

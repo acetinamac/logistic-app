@@ -213,7 +213,7 @@ func (h *Handler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 // @Tags orders
 // @Produce json
 // @Param all query string false "If set to 1 and requester is admin, returns all orders; otherwise returns only own orders"
-// @Success 200 {array} domain.Order "List of orders"
+// @Success 200 {array} domain.OrderListItem "List of orders with details"
 // @Failure 401 {string} string "Unauthorized"
 // @Failure 403 {string} string "Forbidden"
 // @Failure 500 {string} string "Internal server error"
@@ -230,19 +230,19 @@ func (h *Handler) MyOrders(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var (
-		orders []domain.Order
-		err    error
+		items []domain.OrderListItem
+		err   error
 	)
 	if role == domain.RoleAdmin && r.URL.Query().Get("all") == "1" {
-		orders, err = h.Orders.FindAll()
+		items, err = h.Orders.ListJoinedAll()
 	} else {
-		orders, err = h.Orders.FindByCustomer(uid)
+		items, err = h.Orders.ListJoinedByCustomer(uid)
 	}
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return
 	}
-	_ = json.NewEncoder(w).Encode(orders)
+	_ = json.NewEncoder(w).Encode(items)
 }
 
 // UpdateStatus godoc
