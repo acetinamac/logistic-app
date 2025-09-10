@@ -54,6 +54,7 @@ func (h *Handler) Register(r *mux.Router) {
 	// Orders
 	r.HandleFunc("/api/orders", h.CreateOrder).Methods(http.MethodPost)
 	r.HandleFunc("/api/orders", h.MyOrders).Methods(http.MethodGet)
+	r.HandleFunc("/api/orders/{id}", h.GetOrderByID).Methods(http.MethodGet)
 	r.HandleFunc("/api/orders/status", h.GetOrderStatuses).Methods(http.MethodGet)
 	r.HandleFunc("/api/orders/{id}/status", h.UpdateStatus).Methods(http.MethodPatch)
 
@@ -284,6 +285,44 @@ func (h *Handler) UpdateStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(204)
+}
+
+// GetOrderByID godoc
+// @Summary Get order detail by ID
+// @Description Returns the detailed information of a specific order
+// @Tags orders
+// @Produce json
+// @Param id path integer true "Order ID"
+// @Success 200 {object} domain.OrderDetail "Order detail"
+// @Failure 401 {string} string "Unauthorized"
+// @Failure 403 {string} string "Forbidden"
+// @Failure 404 {string} string "Not found"
+// @Failure 500 {string} string "Internal server error"
+// @Security BearerAuth
+// @Router /orders/{id} [get]
+func (h *Handler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
+	uid, role, ok := auth(r)
+	if !ok {
+		http.Error(w, "unauthorized", 401)
+		return
+	}
+	idStr := mux.Vars(r)["id"]
+	id64, _ := strconv.ParseUint(idStr, 10, 64)
+	detail, err := h.Orders.GetDetailByID(uint(id64))
+	if err != nil {
+		// we don't have gorm here; treat any error as not found unless it's clearly a server error
+		if strings.Contains(strings.ToLower(err.Error()), "not found") {
+			http.Error(w, "not found", 404)
+			return
+		}
+		http.Error(w, err.Error(), 500)
+		return
+	}
+	if role != domain.RoleAdmin && detail.UserID != uid {
+		http.Error(w, "forbidden", 403)
+		return
+	}
+	_ = json.NewEncoder(w).Encode(detail)
 }
 
 // ListPackageTypes godoc

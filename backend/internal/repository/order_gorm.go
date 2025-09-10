@@ -24,6 +24,21 @@ func (r *OrderGormRepo) FindByID(id uint) (*domain.Order, error) {
 	return &o, nil
 }
 
+func (r *OrderGormRepo) FindDetailByID(id uint) (*domain.OrderDetail, error) {
+	var d domain.OrderDetail
+	q := r.db.Table("orders as o").
+		Select("o.id, o.order_number, o.created_at, u.id as user_id, u.full_name, o.origin_address_id, ao.street as ao_street, ao.exterior_number as ao_exterior, ao.neighborhood as ao_neighborhood, ao.city as ao_city, ao.postal_code as ao_postal, o.destination_address_id, ad.street as ad_street, ad.exterior_number as ad_exterior, ad.neighborhood as ad_neighborhood, ad.city as ad_city, ad.postal_code as ad_postal, o.actual_weight_kg, o.package_type_id, pt.size_code, o.observations, o.internal_notes, o.updated_at, o.status").
+		Joins("inner join users u on o.customer_id = u.id").
+		Joins("inner join addresses ao on o.origin_address_id = ao.id").
+		Joins("inner join addresses ad on o.destination_address_id = ad.id").
+		Joins("inner join package_types pt on o.package_type_id = pt.id").
+		Where("o.id = ?", id)
+	if err := q.Take(&d).Error; err != nil {
+		return nil, err
+	}
+	return &d, nil
+}
+
 func (r *OrderGormRepo) FindByCustomer(customerID uint) ([]domain.Order, error) {
 	var list []domain.Order
 	if err := r.db.Where("customer_id = ?", customerID).Find(&list).Error; err != nil {

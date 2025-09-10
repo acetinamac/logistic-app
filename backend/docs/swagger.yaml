@@ -62,6 +62,57 @@ definitions:
       updated_by:
         type: integer
     type: object
+  logistics-app_backend_internal_domain.OrderDetail:
+    properties:
+      actual_weight_kg:
+        type: number
+      ad_city:
+        type: string
+      ad_exterior:
+        type: string
+      ad_neighborhood:
+        type: string
+      ad_postal:
+        type: string
+      ad_street:
+        type: string
+      ao_city:
+        type: string
+      ao_exterior:
+        type: string
+      ao_neighborhood:
+        type: string
+      ao_postal:
+        type: string
+      ao_street:
+        type: string
+      created_at:
+        type: string
+      destination_address_id:
+        type: integer
+      full_name:
+        type: string
+      id:
+        type: integer
+      internal_notes:
+        type: string
+      observations:
+        type: string
+      order_number:
+        type: string
+      origin_address_id:
+        type: integer
+      package_type_id:
+        type: integer
+      size_code:
+        $ref: '#/definitions/logistics-app_backend_internal_domain.PackageSize'
+      status:
+        $ref: '#/definitions/logistics-app_backend_internal_domain.OrderStatus'
+      updated_at:
+        type: string
+      user_id:
+        type: integer
+    type: object
   logistics-app_backend_internal_domain.OrderListItem:
     properties:
       actual_weight_kg:
@@ -525,6 +576,43 @@ paths:
       security:
       - BearerAuth: []
       summary: Create new order
+      tags:
+      - orders
+  /orders/{id}:
+    get:
+      description: Returns the detailed information of a specific order
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Order detail
+          schema:
+            $ref: '#/definitions/logistics-app_backend_internal_domain.OrderDetail'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "404":
+          description: Not found
+          schema:
+            type: string
+        "500":
+          description: Internal server error
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get order detail by ID
       tags:
       - orders
   /orders/{id}/status:

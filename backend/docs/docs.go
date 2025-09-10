@@ -614,6 +614,64 @@ const docTemplate = `{
                 }
             }
         },
+        "/orders/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "BearerAuth": []
+                    }
+                ],
+                "description": "Returns the detailed information of a specific order",
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "orders"
+                ],
+                "summary": "Get order detail by ID",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Order ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Order detail",
+                        "schema": {
+                            "$ref": "#/definitions/logistics-app_backend_internal_domain.OrderDetail"
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthorized",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "403": {
+                        "description": "Forbidden",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Not found",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                }
+            }
+        },
         "/orders/{id}/status": {
             "patch": {
                 "security": [
@@ -977,6 +1035,83 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updated_by": {
+                    "type": "integer"
+                }
+            }
+        },
+        "logistics-app_backend_internal_domain.OrderDetail": {
+            "type": "object",
+            "properties": {
+                "actual_weight_kg": {
+                    "type": "number"
+                },
+                "ad_city": {
+                    "type": "string"
+                },
+                "ad_exterior": {
+                    "type": "string"
+                },
+                "ad_neighborhood": {
+                    "type": "string"
+                },
+                "ad_postal": {
+                    "type": "string"
+                },
+                "ad_street": {
+                    "type": "string"
+                },
+                "ao_city": {
+                    "type": "string"
+                },
+                "ao_exterior": {
+                    "type": "string"
+                },
+                "ao_neighborhood": {
+                    "type": "string"
+                },
+                "ao_postal": {
+                    "type": "string"
+                },
+                "ao_street": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "destination_address_id": {
+                    "type": "integer"
+                },
+                "full_name": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "internal_notes": {
+                    "type": "string"
+                },
+                "observations": {
+                    "type": "string"
+                },
+                "order_number": {
+                    "type": "string"
+                },
+                "origin_address_id": {
+                    "type": "integer"
+                },
+                "package_type_id": {
+                    "type": "integer"
+                },
+                "size_code": {
+                    "$ref": "#/definitions/logistics-app_backend_internal_domain.PackageSize"
+                },
+                "status": {
+                    "$ref": "#/definitions/logistics-app_backend_internal_domain.OrderStatus"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "user_id": {
                     "type": "integer"
                 }
             }
