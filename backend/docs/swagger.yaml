@@ -662,7 +662,7 @@ paths:
       - application/json
       responses:
         "200":
-          description: List of order statuses
+          description: List of order status
           schema:
             items:
               properties:
@@ -808,6 +808,39 @@ paths:
       security:
       - BearerAuth: []
       summary: Delete user
+      tags:
+      - users
+    get:
+      description: Returns user details by ID. Only admin or the user themself can
+        access.
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: User details
+          schema:
+            $ref: '#/definitions/logistics-app_backend_internal_domain.User'
+        "401":
+          description: Unauthorized
+          schema:
+            type: string
+        "403":
+          description: Forbidden
+          schema:
+            type: string
+        "404":
+          description: Not found
+          schema:
+            type: string
+      security:
+      - BearerAuth: []
+      summary: Get user by ID
       tags:
       - users
 securityDefinitions:

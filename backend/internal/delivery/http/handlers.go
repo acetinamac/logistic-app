@@ -40,6 +40,7 @@ func (h *Handler) Register(r *mux.Router) {
 	r.HandleFunc("/api/login", h.Login).Methods(http.MethodPost)
 	// Users
 	r.HandleFunc("/api/users", h.RegisterUser).Methods(http.MethodPost)
+	r.HandleFunc("/api/users/{id}", h.GetUserByID).Methods(http.MethodGet)
 	r.HandleFunc("/api/users/{id}", h.DeleteUser).Methods(http.MethodDelete)
 	// Package Types
 	r.HandleFunc("/api/package-types", h.ListPackageTypes).Methods(http.MethodGet)
@@ -137,6 +138,39 @@ func (h *Handler) RegisterUser(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	w.WriteHeader(201)
+	_ = json.NewEncoder(w).Encode(u)
+}
+
+// GetUserByID godoc
+// @Summary Get user by ID
+// @Description Returns user details by ID. Only admin or the user themself can access.
+// @Tags users
+// @Produce json
+// @Param id path integer true "User ID"
+// @Success 200 {object} domain.User "User details"
+// @Failure 401 {string} string "Unauthorized"
+// @Failure 403 {string} string "Forbidden"
+// @Failure 404 {string} string "Not found"
+// @Security BearerAuth
+// @Router /users/{id} [get]
+func (h *Handler) GetUserByID(w http.ResponseWriter, r *http.Request) {
+	uid, role, ok := auth(r)
+	if !ok {
+		http.Error(w, "unauthorized", 401)
+		return
+	}
+	idStr := mux.Vars(r)["id"]
+	id64, _ := strconv.ParseUint(idStr, 10, 64)
+	id := uint(id64)
+	if role != domain.RoleAdmin && uid != id {
+		http.Error(w, "forbidden", 403)
+		return
+	}
+	u, err := h.Users.GetByID(id)
+	if err != nil || u == nil {
+		http.Error(w, "not found", 404)
+		return
+	}
 	_ = json.NewEncoder(w).Encode(u)
 }
 

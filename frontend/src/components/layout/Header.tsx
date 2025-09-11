@@ -1,9 +1,11 @@
 "use client";
 import React, {useState, useRef, useEffect} from "react";
 import {useAuth} from "../features/auth/AuthContext";
+import UserProfileModal from "../forms/UserProfileModal";
 
 const Header: React.FC = () => {
     const {isAuthenticated, email, logout} = useAuth();
+    const [profileOpen, setProfileOpen] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
     const dropdownRef = useRef<HTMLDivElement>(null);
 
@@ -105,7 +107,7 @@ const Header: React.FC = () => {
                                     <li className="border-bottom">
                                         <button
                                             className="dropdown-item d-flex align-items-center py-2 mb-1"
-                                            onClick={() => {/* Aquí iría la función para manejar el perfil */}}
+                                            onClick={() => { setProfileOpen(true); setMenuOpen(false); }}
                                         >
                                             <svg
                                                 width="16"
@@ -146,6 +148,7 @@ const Header: React.FC = () => {
                     )}
                 </div>
             </div>
+            <UserProfileModal open={profileOpen} onClose={()=>setProfileOpen(false)} />
         </header>
     );
 };

@@ -3,9 +3,6 @@ package domain
 import "time"
 
 // OrderDetail represents the detailed view of an order with joined info
-// Mirrors the columns requested in the SQL provided by the user
-// JSON tags match snake_case names expected by the frontend
-
 type OrderDetail struct {
 	ID                   uint        `json:"id"`
 	OrderNumber          string      `json:"order_number"`

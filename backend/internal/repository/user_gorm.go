@@ -24,6 +24,19 @@ func (r *UserGormRepo) FindByEmail(email string) (*domain.User, error) {
 	}
 	return &u, nil
 }
+
+func (r *UserGormRepo) FindByID(id uint) (*domain.User, error) {
+	var u domain.User
+	// Only select allowed fields
+	if err := r.db.Model(&domain.User{}).
+		Select("id, email, role, phone, full_name, is_active, created_at, updated_at").
+		First(&u, id).Error; err != nil {
+		return nil, err
+	}
+	return &u, nil
+}
+
 func (r *UserGormRepo) DeleteByID(id uint) error {
+
 	return r.db.Delete(&domain.User{}, id).Error
 }

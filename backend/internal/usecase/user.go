@@ -10,6 +10,7 @@ import (
 type UserRepo interface {
 	Create(u *domain.User) error
 	FindByEmail(email string) (*domain.User, error)
+	FindByID(id uint) (*domain.User, error)
 	DeleteByID(id uint) error
 }
 
@@ -61,4 +62,8 @@ func (s *UserService) Authenticate(email, password string) (*domain.User, error)
 		return nil, errors.New("invalid password")
 	}
 	return u, nil
+}
+
+func (s *UserService) GetByID(id uint) (*domain.User, error) {
+	return s.repo.FindByID(id)
 }
