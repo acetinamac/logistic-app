@@ -1,13 +1,537 @@
 {
-  "info": {"name": "Logistics API", "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"},
-  "item": [
-    {"name":"Register user","request":{"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"url":{"raw":"http://localhost:8080/api/users","protocol":"http","host":["localhost"],"port":"8080","path":["api","users"]},"body":{"mode":"raw","raw":"{\n  \"email\": \"user@example.com\",\n  \"password\": \"secret\",\n  \"role\": \"client\"\n}"}}},
-    {"name":"Login (client)","request":{"method":"POST","header":[{"key":"Content-Type","value":"application/json"}],"url":{"raw":"http://localhost:8080/api/login","protocol":"http","host":["localhost"],"port":"8080","path":["api","login"]},"body":{"mode":"raw","raw":"{\n  \"user_id\": 1,\n  \"role\": \"client\"\n}"}}},
-    {"name":"Create order","request":{"method":"POST","header":[{"key":"Content-Type","value":"application/json"},{"key":"Authorization","value":"Bearer {{token}}"}],"url":{"raw":"http://localhost:8080/api/orders","protocol":"http","host":["localhost"],"port":"8080","path":["api","orders"]},"body":{"mode":"raw","raw":"{\n  \"origin_coord\": {\n    \"lat\": 19.4326,\n    \"lng\": -99.1332\n  },\n  \"destination_coord\": {\n    \"lat\": 20.6597,\n    \"lng\": -103.3496\n  },\n  \"origin_address\": {\n    \"country\": \"MX\",\n    \"state\": \"CDMX\",\n    \"city\": \"CDMX\",\n    \"zipcode\": \"01000\",\n    \"street\": \"Av. Reforma\",\n    \"ext_num\": \"1\",\n    \"int_num\": \"\"\n  },\n  \"destination_address\": {\n    \"country\": \"MX\",\n    \"state\": \"JAL\",\n    \"city\": \"GDL\",\n    \"zipcode\": \"44100\",\n    \"street\": \"Av. Juarez\",\n    \"ext_num\": \"10\",\n    \"int_num\": \"2\"\n  },\n  \"items_count\": 1,\n  \"weight_kg\": 3\n}"}}},
-    {"name":"My orders","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{token}}"}],"url":{"raw":"http://localhost:8080/api/orders","protocol":"http","host":["localhost"],"port":"8080","path":["api","orders"]}}},
-    {"name":"Admin - all orders","request":{"method":"GET","header":[{"key":"Authorization","value":"Bearer {{token}}"}],"url":{"raw":"http://localhost:8080/api/admin/orders","protocol":"http","host":["localhost"],"port":"8080","path":["api","admin","orders"]}}},
-    {"name":"Admin - update status","request":{"method":"PATCH","header":[{"key":"Content-Type","value":"application/json"},{"key":"Authorization","value":"Bearer {{token}}"}],"url":{"raw":"http://localhost:8080/api/admin/orders/1/status","protocol":"http","host":["localhost"],"port":"8080","path":["api","admin","orders","1","status"]},"body":{"mode":"raw","raw":"{\n  \"status\": \"en_ruta\"\n}"}}},
-    {"name":"Delete user (self or admin)","request":{"method":"DELETE","header":[{"key":"Authorization","value":"Bearer {{token}}"}],"url":{"raw":"http://localhost:8080/api/users/1","protocol":"http","host":["localhost"],"port":"8080","path":["api","users","1"]}}}
+  "info": {
+    "name": "Logistics API Collection",
+    "description": "Colección de Postman generada desde la documentación Swagger de la API de Logistics",
+    "version": "1.0.0",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{auth_token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:8080/api",
+      "type": "string"
+    },
+    {
+      "key": "auth_token",
+      "value": "",
+      "type": "string"
+    }
   ],
-  "variable": [{"key":"token","value":""}]
+  "item": [
+    {
+      "name": "Authentication",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"usuario@ejemplo.com\",\n  \"password\": \"password123\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/login",
+              "host": ["{{base_url}}"],
+              "path": ["login"]
+            }
+          },
+          "response": [],
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "if (pm.response.code === 200) {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.collectionVariables.set('auth_token', responseJson.token);",
+                  "    console.log('Token guardado:', responseJson.token);",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "item": [
+        {
+          "name": "Registrar Usuario",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"nuevo@usuario.com\",\n  \"password\": \"password123\",\n  \"full_name\": \"Usuario Completo\",\n  \"phone\": \"+52 555 123 4567\",\n  \"role\": \"client\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/users",
+              "host": ["{{base_url}}"],
+              "path": ["users"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener Usuario por ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/1",
+              "host": ["{{base_url}}"],
+              "path": ["users", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar Usuario",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/users/1",
+              "host": ["{{base_url}}"],
+              "path": ["users", "1"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Addresses",
+      "item": [
+        {
+          "name": "Listar Direcciones",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/addresses?all=0&include_inactive=0",
+              "host": ["{{base_url}}"],
+              "path": ["addresses"],
+              "query": [
+                {
+                  "key": "all",
+                  "value": "0"
+                },
+                {
+                  "key": "include_inactive",
+                  "value": "0"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear Dirección",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"street\": \"Av. Principal\",\n  \"exterior_number\": \"123\",\n  \"interior_number\": \"4B\",\n  \"neighborhood\": \"Centro\",\n  \"city\": \"Ciudad de México\",\n  \"state\": \"CDMX\",\n  \"postal_code\": \"06000\",\n  \"country\": \"México\",\n  \"coordinates\": {\n    \"latitude\": 19.4326,\n    \"longitude\": -99.1332\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/addresses",
+              "host": ["{{base_url}}"],
+              "path": ["addresses"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener Dirección por ID",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/addresses/1",
+              "host": ["{{base_url}}"],
+              "path": ["addresses", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar Dirección",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"street\": \"Av. Principal Modificada\",\n  \"exterior_number\": \"123\",\n  \"interior_number\": \"4B\",\n  \"neighborhood\": \"Centro\",\n  \"city\": \"Ciudad de México\",\n  \"state\": \"CDMX\",\n  \"postal_code\": \"06000\",\n  \"country\": \"México\",\n  \"is_active\": true,\n  \"coordinates\": {\n    \"latitude\": 19.4326,\n    \"longitude\": -99.1332\n  }\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/addresses/1",
+              "host": ["{{base_url}}"],
+              "path": ["addresses", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cambiar Estado Activo de Dirección",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"active\": false\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/addresses/1/active",
+              "host": ["{{base_url}}"],
+              "path": ["addresses", "1", "active"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar Dirección",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/addresses/1",
+              "host": ["{{base_url}}"],
+              "path": ["addresses", "1"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Package Types",
+      "item": [
+        {
+          "name": "Listar Tipos de Paquete",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/package-types?all=0",
+              "host": ["{{base_url}}"],
+              "path": ["package-types"],
+              "query": [
+                {
+                  "key": "all",
+                  "value": "0"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Cambiar Estado Activo de Tipo de Paquete",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"active\": true\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/package-types/1/active",
+              "host": ["{{base_url}}"],
+              "path": ["package-types", "1", "active"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Orders",
+      "item": [
+        {
+          "name": "Listar Órdenes",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/orders?all=0",
+              "host": ["{{base_url}}"],
+              "path": ["orders"],
+              "query": [
+                {
+                  "key": "all",
+                  "value": "0"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Crear Nueva Orden",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"origin_address_id\": 1,\n  \"destination_address_id\": 2,\n  \"package_type_id\": 1,\n  \"quantity\": 1,\n  \"actual_weight_kg\": 2.5,\n  \"observations\": \"Manejar con cuidado\",\n  \"internal_notes\": \"Cliente VIP\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/orders",
+              "host": ["{{base_url}}"],
+              "path": ["orders"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener Estados de Orden",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/orders/status",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "status"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Obtener Detalle de Orden",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{base_url}}/orders/1",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "1"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Actualizar Estado de Orden",
+          "request": {
+            "auth": {
+              "type": "bearer",
+              "bearer": [
+                {
+                  "key": "token",
+                  "value": "{{auth_token}}",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"collected\"\n}"
+            },
+            "url": {
+              "raw": "{{base_url}}/orders/1/status",
+              "host": ["{{base_url}}"],
+              "path": ["orders", "1", "status"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
 }

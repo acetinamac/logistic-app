@@ -71,6 +71,10 @@ La API quedará en http://localhost:8080
 
 ## Justificación PostgreSQL
 PostgreSQL ofrece integridad ACID, tipos avanzados (jsonb), extensiones geoespaciales (PostGIS) ideales para logística, y es excelente con GORM por su madurez.
+![Postman Collection](./docs/postgresql-database.png)
 
 ## Postman
-En la carpeta postman/ se incluye una colección con ejemplos (login cliente, crear orden, listar, actualizar status).
+En la carpeta postman/ se incluye una colección con ejemplos (login cliente, crear orden, listar, actualizar status, etc).
+
+![Postman Collection](./docs/postman-collection-preview.png)
+

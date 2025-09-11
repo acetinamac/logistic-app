@@ -1,8 +1,9 @@
 # Logistics Fullstack (Go + Next.js)
+![Postman Collection](./docs/logistic-app.png)
 
 Solución MVP para la prueba técnica. Incluye:
-- Backend en Go 1.24 con GORM y PostgreSQL, JWT sin expiración, roles client/admin, y reglas de negocio para órdenes.
-- Frontend en Next.js (App Router) con React Hooks, vistas Cliente y Admin.
+- Backend en Go 1.25 con GORM y PostgreSQL, JWT, roles client/admin, y reglas de negocio para órdenes.
+- Frontend en Next.js (App Router) con React Hooks.
 - Orquestación con Docker Compose.
 - Colección Postman.
 
@@ -27,6 +28,5 @@ docker compose up --build
 - PostgreSQL: elegido por consistencia ACID, capacidades avanzadas y extensiones (PostGIS) útiles en logística.
 
 ## Roadmap
-- Registro/login real de usuarios (hash de contraseñas) y expiración de tokens controlada por roles.
 - Validaciones por país de direcciones; normalización y geocodificación.
 - Tests de integración y CI.
