@@ -31,7 +31,7 @@ const RegisterForm: React.FC<{ onSwitchToLogin?: () => void }> = ({onSwitchToLog
     };
 
     return (
-        <div className="card shadow-sm" style={{maxWidth: 420, width: "100%"}}>
+        <div className="card shadow-sm">
             <div className="card-body">
                 <h5 className="card-title mb-3">Registro</h5>
                 <form onSubmit={handleSubmit}>

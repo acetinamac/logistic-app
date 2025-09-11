@@ -49,3 +49,204 @@ header {
     background-color: #5855eb;
     border-color: #5855eb;
 }
+
+.login-container {
+    min-height: 100vh;
+    width: 100%;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.login-container .login-card {
+    background: white;
+    border-radius: 5px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    overflow: hidden;
+    max-width: 900px;
+    width: 100%;
+}
+
+.login-container .left-panel {
+    padding: 5px;
+    position: relative;
+    overflow: hidden;
+}
+
+@keyframes float {
+    0% { transform: translate(0, 0) rotate(0deg); }
+    100% { transform: translate(-50px, -50px) rotate(360deg); }
+}
+
+.login-container .lock-icon {
+    width: 120px;
+    height: 120px;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 2rem;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    transform: perspective(1000px) rotateX(15deg);
+}
+
+.login-container .lock-icon i {
+    font-size: 3rem;
+    color: white;
+}
+
+.login-container .floating-elements {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+}
+
+.login-container .floating-element {
+    position: absolute;
+    background: rgba(255,255,255,0.1);
+    border-radius: 10px;
+    animation: floatUpDown 6s ease-in-out infinite;
+}
+
+.login-container .floating-element:nth-child(1) {
+    width: 60px;
+    height: 30px;
+    top: 20%;
+    left: 10%;
+    animation-delay: 0s;
+}
+
+.login-container .floating-element:nth-child(2) {
+    width: 40px;
+    height: 40px;
+    top: 60%;
+    right: 15%;
+    animation-delay: 2s;
+}
+
+.login-container .floating-element:nth-child(3) {
+    width: 80px;
+    height: 20px;
+    bottom: 30%;
+    left: 20%;
+    animation-delay: 4s;
+}
+
+.login-container .envelope-icon {
+    position: absolute;
+    top: 40%;
+    right: 10%;
+    width: 80px;
+    height: 60px;
+    background: linear-gradient(135deg, #4facfe, #00f2fe);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    animation: bounce 3s ease-in-out infinite;
+}
+
+.login-container .envelope-icon i {
+    font-size: 1.5rem;
+    color: white;
+}
+
+.login-container .right-panel {
+    padding: 3rem;
+}
+
+.login-container .brand {
+    color: #667eea;
+    font-weight: bold;
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.login-container .form-title {
+    font-size: 1.8rem;
+    font-weight: bold;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.login-container .form-subtitle {
+    color: #666;
+    margin-bottom: 2rem;
+    line-height: 1.5;
+}
+
+.login-container .form-floating {
+    margin-bottom: 1.5rem;
+}
+
+.login-container .form-floating .form-control {
+    border: 2px solid #e1e5e9;
+    border-radius: 10px;
+    padding: 1rem 0.75rem;
+    height: auto;
+    font-size: 0.95rem;
+}
+
+.login-container .form-floating .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.login-container .form-floating label {
+    color: #666;
+    font-weight: 500;
+}
+
+.login-container .btn-send {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    border: none;
+    border-radius: 25px;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    width: 100%;
+    color: white;
+    transition: all 0.3s ease;
+    margin-bottom: 1.5rem;
+}
+
+.login-container .btn-send:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+    color: white;
+}
+
+.login-container .back-link {
+    text-align: center;
+    color: #666;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.login-container .back-link:hover {
+    color: #667eea;
+}
+
+@media (max-width: 768px) {
+    .login-container .left-panel {
+        display: none;
+    }
+
+    .login-container .right-panel {
+        padding: 2rem;
+    }
+}
+
+/* Prevent Bootstrap .row negative margins from shifting the centered card */
+.login-container .login-card.row {
+    margin-left: 0;
+    margin-right: 0;
+}

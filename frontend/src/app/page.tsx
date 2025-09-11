@@ -12,7 +12,7 @@ export default function Home() {
   if (!isAuthenticated) {
     return (
       <div className="container-fluid min-vh-100 d-flex align-items-center justify-content-center">
-        <div className="w-100" style={{ maxWidth: 480 }}>
+        <div className="w-100" style={{ maxWidth: 680 }}>
           {!showRegister ? (
             <LoginForm onSwitchToRegister={()=>setShowRegister(true)} />
           ) : (
