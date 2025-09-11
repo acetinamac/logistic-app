@@ -59,6 +59,17 @@ Este backend implementa una API para gestión de órdenes con autenticación JWT
 - Validación de seguridad
 - Validación cambio de estado en órdenes
 
+## Ejecutar en local cn Makefile: Make [targets]
+### Targets disponibles:
+#### dev    - Ejecuta tests y si pasan, inicia el servidor con Air
+#### test   - Ejecuta todos los tests en la carpeta $(TEST_DIR)
+#### swag   - Genera la documentación Swagger (swag init)
+#### build  - Compila el binario en $(BIN)
+#### run    - Ejecuta el binario compilado
+#### clean  - Limpia artefactos temporales
+#### deps   - Descarga dependencias de Go
+#### tools  - Instala herramientas (air, swag)
+
 ## Ejecutar con Docker
 ```
 docker compose up --build
