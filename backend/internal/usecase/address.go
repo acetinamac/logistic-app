@@ -17,9 +17,10 @@ type AddressRepo interface {
 
 type AddressService struct{ repo AddressRepo }
 
-func NewAddressService(r AddressRepo) *AddressService { return &AddressService{repo: r} }
+func NewAddressService(r AddressRepo) *AddressService {
+	return &AddressService{repo: r}
+}
 
-// DTOs to accept combined JSON in handlers
 type AddressRequest struct {
 	Street         string `json:"street"`
 	ExteriorNumber string `json:"exterior_number"`
@@ -48,9 +49,11 @@ func (s *AddressService) toRepoPayload(req AddressRequest) repository.AddressWit
 		Country:        req.Country,
 	}
 	var coords *domain.Coordinates
+
 	if req.Coordinates != nil {
 		coords = &domain.Coordinates{Latitude: req.Coordinates.Latitude, Longitude: req.Coordinates.Longitude}
 	}
+
 	return repository.AddressWithCoords{Address: addr, Coordinates: coords}
 }
 
@@ -58,19 +61,32 @@ func (s *AddressService) Create(customerID uint, req AddressRequest) (*domain.Ad
 	if customerID == 0 {
 		return nil, nil, errors.New("customerID requerido")
 	}
+
 	if req.Street == "" || req.City == "" || req.State == "" {
 		return nil, nil, errors.New("street, city y state son requeridos")
 	}
+
+	if req.Coordinates != nil {
+		if req.Coordinates.Latitude < -90 || req.Coordinates.Latitude > 90 {
+			return nil, nil, errors.New("latitud debe estar entre -90 y 90 grados")
+		}
+		if req.Coordinates.Longitude < -180 || req.Coordinates.Longitude > 180 {
+			return nil, nil, errors.New("longitud debe estar entre -180 y 180 grados")
+		}
+	}
+
 	payload := s.toRepoPayload(req)
 	addr, coords, err := s.repo.CreateWithCoordinates(customerID, payload)
 	if err != nil {
 		return nil, nil, err
 	}
+
 	// allow overriding is_active on create if provided
 	if req.IsActive != nil {
 		_ = s.repo.ToggleActive(customerID, false, addr.ID, *req.IsActive)
 		addr.IsActive = *req.IsActive
 	}
+
 	return addr, coords, nil
 }
 
@@ -78,17 +94,21 @@ func (s *AddressService) Update(requesterID uint, isAdmin bool, id uint, req Add
 	if id == 0 {
 		return nil, nil, errors.New("id requerido")
 	}
+
 	payload := s.toRepoPayload(req)
 	addr, coords, err := s.repo.UpdateWithCoordinates(requesterID, isAdmin, id, payload)
+
 	if err != nil {
 		return nil, nil, err
 	}
+
 	if req.IsActive != nil {
 		if err := s.repo.ToggleActive(requesterID, isAdmin, id, *req.IsActive); err != nil {
 			return nil, nil, err
 		}
 		addr.IsActive = *req.IsActive
 	}
+
 	return addr, coords, nil
 }
 
@@ -98,7 +118,6 @@ func (s *AddressService) Get(requesterID uint, isAdmin bool, id uint) (*domain.A
 
 func (s *AddressService) List(requesterID uint, role domain.Role, includeInactive bool, all bool) ([]domain.Address, error) {
 	isAdmin := role == domain.RoleAdmin
-	// For clients, force includeInactive=false and own records only
 	return s.repo.List(requesterID, isAdmin && all, includeInactive && isAdmin)
 }
 

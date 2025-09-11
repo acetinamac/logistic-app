@@ -14,6 +14,7 @@ export type OrderRow = {
   full_name: string;
   origin_full_address: string;
   destination_full_address: string;
+  quantity: number;
   actual_weight_kg: number;
   size_code: string;
   status: string;
@@ -45,7 +46,7 @@ const MainContent: React.FC = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`${API_BASE}/api/orders`, {
+      const res = await fetch(`${API_BASE}/api/orders?all=1`, {
         credentials: "include",
         headers: {
           Authorization: `Bearer ${token}`,
@@ -71,12 +72,12 @@ const MainContent: React.FC = () => {
   // Columns for react-data-grid
   const columns = React.useMemo<readonly Column<OrderRow>[]>(
     () => [
-        { key: "id", name: "Id", resizable: true, width: 110, hidden: true},
-        { key: "order_number", name: "Orden", resizable: true, width: 110, frozen: true },
+        { key: "order_number", name: "Orden", resizable: true, width: 170, frozen: true },
         { key: "created_at", name: "Fecha", resizable: true, width: 110 },
-        { key: "full_name", name: "Cliente", resizable: true, minWidth: 140 },
-        { key: "origin_full_address", name: "Origen", resizable: true, minWidth: 220 },
-        { key: "destination_full_address", name: "Destino", resizable: true, minWidth: 220 },
+        { key: "full_name", name: "Cliente", resizable: true, minWidth: 130 },
+        { key: "origin_full_address", name: "Origen", resizable: true, minWidth: 200 },
+        { key: "destination_full_address", name: "Destino", resizable: true, minWidth: 200 },
+        { key: "quantity", name: "Cantidad", resizable: true, width: 100},
         { key: "actual_weight_kg", name: "Peso (kg)", resizable: true, width: 100 },
         { key: "size_code", name: "Tamaño", resizable: true, width: 90 },
         { key: "status", name: "Estado", resizable: true, width: 120 },

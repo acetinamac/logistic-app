@@ -9,6 +9,7 @@ const (
 	RoleAdmin  Role = "admin"
 )
 
+// User table
 type User struct {
 	ID               uint      `json:"id" gorm:"primaryKey"`
 	Email            string    `json:"email" gorm:"uniqueIndex;size:255"`

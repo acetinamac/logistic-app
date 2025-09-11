@@ -1,9 +1,9 @@
 // Package main Logistics API.
 // @title           Logistics API
 // @version         1.0
-// @description     API del backend de logística.
-// @contact.name    Equipo Backend
-// @contact.email   devs@example.com
+// @description     Backend de logístic App.
+// @contact.name    Armin Cetina Mac
+// @contact.email   armin.cetina.mac@gmail.com
 // @BasePath        /api
 // @securityDefinitions.apikey BearerAuth
 // @in header

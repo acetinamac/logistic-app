@@ -55,6 +55,8 @@ definitions:
         type: integer
       package_type_id:
         type: integer
+      quantity:
+        type: integer
       status:
         $ref: '#/definitions/logistics-app_backend_internal_domain.OrderStatus'
       updated_at:
@@ -104,6 +106,8 @@ definitions:
         type: integer
       package_type_id:
         type: integer
+      quantity:
+        type: integer
       size_code:
         $ref: '#/definitions/logistics-app_backend_internal_domain.PackageSize'
       status:
@@ -129,6 +133,8 @@ definitions:
         type: string
       origin_full_address:
         type: string
+      quantity:
+        type: integer
       size_code:
         $ref: '#/definitions/logistics-app_backend_internal_domain.PackageSize'
       status:
@@ -210,9 +216,9 @@ definitions:
     type: object
 info:
   contact:
-    email: devs@example.com
-    name: Equipo Backend
-  description: API del backend de logística.
+    email: armin.cetina.mac@gmail.com
+    name: Armin Cetina Mac
+  description: Backend de logístic App.
   title: Logistics API
   version: "1.0"
 paths:

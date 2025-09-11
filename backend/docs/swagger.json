@@ -1,11 +1,11 @@
 {
     "swagger": "2.0",
     "info": {
-        "description": "API del backend de logística.",
+        "description": "Backend de logístic App.",
         "title": "Logistics API",
         "contact": {
-            "name": "Equipo Backend",
-            "email": "devs@example.com"
+            "name": "Armin Cetina Mac",
+            "email": "armin.cetina.mac@gmail.com"
         },
         "version": "1.0"
     },
@@ -1071,6 +1071,9 @@
                 "package_type_id": {
                     "type": "integer"
                 },
+                "quantity": {
+                    "type": "integer"
+                },
                 "status": {
                     "$ref": "#/definitions/logistics-app_backend_internal_domain.OrderStatus"
                 },
@@ -1145,6 +1148,9 @@
                 "package_type_id": {
                     "type": "integer"
                 },
+                "quantity": {
+                    "type": "integer"
+                },
                 "size_code": {
                     "$ref": "#/definitions/logistics-app_backend_internal_domain.PackageSize"
                 },
@@ -1182,6 +1188,9 @@
                 },
                 "origin_full_address": {
                     "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
                 },
                 "size_code": {
                     "$ref": "#/definitions/logistics-app_backend_internal_domain.PackageSize"

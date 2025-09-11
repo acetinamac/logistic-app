@@ -21,6 +21,7 @@ type OrderDetail struct {
 	ADNeighborhood       string      `json:"ad_neighborhood"`
 	ADCity               string      `json:"ad_city"`
 	ADPostal             string      `json:"ad_postal"`
+	Quantity             uint        `json:"quantity"`
 	ActualWeightKg       float64     `json:"actual_weight_kg"`
 	PackageTypeID        uint        `json:"package_type_id"`
 	SizeCode             PackageSize `json:"size_code"`

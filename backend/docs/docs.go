@@ -10,8 +10,8 @@ const docTemplate = `{
         "description": "{{escape .Description}}",
         "title": "{{.Title}}",
         "contact": {
-            "name": "Equipo Backend",
-            "email": "devs@example.com"
+            "name": "Armin Cetina Mac",
+            "email": "armin.cetina.mac@gmail.com"
         },
         "version": "{{.Version}}"
     },
@@ -1078,6 +1078,9 @@ const docTemplate = `{
                 "package_type_id": {
                     "type": "integer"
                 },
+                "quantity": {
+                    "type": "integer"
+                },
                 "status": {
                     "$ref": "#/definitions/logistics-app_backend_internal_domain.OrderStatus"
                 },
@@ -1152,6 +1155,9 @@ const docTemplate = `{
                 "package_type_id": {
                     "type": "integer"
                 },
+                "quantity": {
+                    "type": "integer"
+                },
                 "size_code": {
                     "$ref": "#/definitions/logistics-app_backend_internal_domain.PackageSize"
                 },
@@ -1189,6 +1195,9 @@ const docTemplate = `{
                 },
                 "origin_full_address": {
                     "type": "string"
+                },
+                "quantity": {
+                    "type": "integer"
                 },
                 "size_code": {
                     "$ref": "#/definitions/logistics-app_backend_internal_domain.PackageSize"
@@ -1318,7 +1327,7 @@ var SwaggerInfo = &swag.Spec{
 	BasePath:         "/api",
 	Schemes:          []string{},
 	Title:            "Logistics API",
-	Description:      "API del backend de logística.",
+	Description:      "Backend de logístic App.",
 	InfoInstanceName: "swagger",
 	SwaggerTemplate:  docTemplate,
 	LeftDelim:        "{{",

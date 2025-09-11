@@ -33,13 +33,16 @@ func (s *UserService) Register(email, password, fullName, phone string, role dom
 
 	// Hash password before storing
 	hash, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+
 	if err != nil {
 		return nil, errors.New("no se pudo encriptar el password")
 	}
 	u := &domain.User{Email: email, Password: string(hash), FullName: fullName, Phone: phone, Role: role, IsActive: true}
+
 	if err := s.repo.Create(u); err != nil {
 		return nil, err
 	}
+
 	return u, nil
 }
 

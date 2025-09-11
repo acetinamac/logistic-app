@@ -29,6 +29,7 @@ type Order struct {
 	OriginAddressID      uint        `json:"origin_address_id" gorm:"not null"`
 	DestinationAddressID uint        `json:"destination_address_id" gorm:"not null"`
 	PackageTypeID        uint        `json:"package_type_id" gorm:"not null"`
+	Quantity             uint        `json:"quantity" gorm:"not null"`
 	ActualWeightKg       float64     `json:"actual_weight_kg" gorm:"type:decimal(5,2)"`
 	Status               OrderStatus `json:"status" gorm:"type:order_status_enum;default:created;not null"`
 	CustomerID           uint        `json:"customer_id" gorm:"not null"`

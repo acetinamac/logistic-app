@@ -2,21 +2,27 @@
 AIR_CONF := .air.toml
 BIN := ./tmp/main.exe
 MAIN := cmd/api/main.go
+TEST_DIR := ./tests
 
 # Target por defecto
 .DEFAULT_GOAL := dev
 
-.PHONY: dev swag build run clean deps tools help
+.PHONY: dev test swag build run clean deps tools help
 
 help:
 	@echo "Targets disponibles:"
-	@echo "  dev    - Inicia el servidor con Air usando $(AIR_CONF)"
+	@echo "  dev    - Ejecuta tests y si pasan, inicia el servidor con Air"
+	@echo "  test   - Ejecuta todos los tests en la carpeta $(TEST_DIR)"
 	@echo "  swag   - Genera la documentación Swagger (swag init)"
 	@echo "  build  - Compila el binario en $(BIN)"
 	@echo "  run    - Ejecuta el binario compilado"
 	@echo "  clean  - Limpia artefactos temporales"
 	@echo "  deps   - Descarga dependencias de Go"
 	@echo "  tools  - Instala herramientas (air, swag)"
+
+test:
+	@echo "Ejecutando tests..."
+	go test -v $(TEST_DIR)/...
 
 dev:
 	air -c $(AIR_CONF)

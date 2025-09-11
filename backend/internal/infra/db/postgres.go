@@ -21,20 +21,26 @@ func Connect() (*Database, error) {
 
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=%s TimeZone=UTC", host, user, pass, dbname, port, ssl)
 	database, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+
 	if err != nil {
 		return nil, err
 	}
-	// Ensure PostgreSQL enum types exist
+
+	// Ensure ALL PostgreSQL enum types exist
 	if err := database.Exec("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'user_role_enum') THEN CREATE TYPE user_role_enum AS ENUM ('client','admin'); END IF; END $$;").Error; err != nil {
 		return nil, err
 	}
+
 	if err := database.Exec("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'package_size_enum') THEN CREATE TYPE package_size_enum AS ENUM ('S','M','L','XL'); END IF; END $$;").Error; err != nil {
 		return nil, err
 	}
+
 	if err := database.Exec("DO $$ BEGIN IF NOT EXISTS (SELECT 1 FROM pg_type WHERE typname = 'order_status_enum') THEN CREATE TYPE order_status_enum AS ENUM ('created','collected','in_station','in_route','delivered','cancelled'); END IF; END $$;").Error; err != nil {
 		return nil, err
 	}
+
 	log.Println("connected to postgres")
+
 	return &Database{database}, nil
 }
 

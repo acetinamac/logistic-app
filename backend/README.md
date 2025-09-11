@@ -1,29 +1,63 @@
-# Backend (Go + GORM + PostgreSQL)
+# Backend (Go + Mux + GORM + PostgreSQL)
 
-Este backend implementa una API para gestión de órdenes con autenticación JWT (sin expiración) y roles (cliente y admin) siguiendo una estructura inspirada en Clean Architecture.
+Este backend implementa una API para gestión de órdenes con autenticación JWT y roles (cliente y admin) siguiendo una estructura inspirada en Clean Architecture.
 
 ## Requisitos
-- Go 1.24
+- Go 1.25
 - Docker / Docker Compose
 
 ## Estructura
 - cmd/api: punto de entrada
 - internal/domain: entidades (Order, User)
-- internal/usecase: casos de uso (OrderService)
+- internal/usecase: casos de uso (OrderService, PackageService, AddressService, UserService)
 - internal/repository: implementación GORM
 - internal/infra/db: conexión a Postgres
 - internal/delivery/http: handlers HTTP y autenticación
 
 ## Endpoints (MVP)
-- POST /api/users => registrar usuario (body: {email, password, role?})
-- DELETE /api/users/{id} => eliminar usuario (admin o el propio usuario)
-- POST /api/login => body: {"user_id": number, "role": "client"|"admin"} devuelve token JWT
-- POST /api/orders (cliente|admin)
-- GET /api/orders (cliente => solo propias; admin => si ?all=1, todas)
-- GET /api/admin/orders (admin)
-- PATCH /api/admin/orders/{id}/status (admin)
 
-Reglas de negocio: tamaño del paquete según peso (S ≤5kg, M ≤15kg, L ≤25kg). Si peso>25kg => error solicitando convenio especial.
+## Endpoints (MVP)
+
+### Auth
+
+- POST /api/login => body: {email, password} devuelve token JWT
+- POST /api/users => registrar usuario (body: {email, password, full_name, phone, role?})
+
+### Usuarios
+
+- GET /api/users/{id} => obtener usuario por ID (admin o el propio usuario)
+- DELETE /api/users/{id} => eliminar usuario (admin o el propio usuario)
+
+### Direcciones
+
+- GET /api/addresses => listar direcciones (cliente => propias; admin => todas con ?all=1)
+- POST /api/addresses => crear dirección con coordenadas opcionales
+- GET /api/addresses/{id} => obtener dirección por ID
+- PUT /api/addresses/{id} => actualizar dirección
+- DELETE /api/addresses/{id} => eliminar dirección
+- PATCH /api/addresses/{id}/active => activar/desactivar dirección
+
+### Órdenes
+
+- GET /api/orders => listar órdenes (cliente => propias; admin => todas con ?all=1)
+- POST /api/orders => crear orden
+- GET /api/orders/{id} => obtener detalle de orden
+- PATCH /api/orders/{id}/status => actualizar estado (admin)
+- GET /api/orders/status => listar estados disponibles
+
+### Tipos de paquetes
+
+- GET /api/package-types => listar tipos de paquete (activos por defecto, admin puede ver inactivos con ?all=1)
+- PATCH /api/package-types/{id}/active => activar/desactivar tipo de paquete (admin)
+
+## Reglas de negocio: 
+- tamaño del paquete según peso (S ≤5kg, M ≤15kg, L ≤25kg). Si peso>25kg => error solicitando convenio especial.
+- Validación de órdenes por role
+- Valición de direcciones por role
+- Validación de coordenadas
+- Validacion de direcciones
+- Validación de seguridad
+- Validación cambio de estado en órdenes
 
 ## Ejecutar con Docker
 ```

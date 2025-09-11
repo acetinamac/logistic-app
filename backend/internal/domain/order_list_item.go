@@ -8,6 +8,7 @@ type OrderListItem struct {
 	FullName               string      `json:"full_name"`
 	OriginFullAddress      string      `json:"origin_full_address"`
 	DestinationFullAddress string      `json:"destination_full_address"`
+	Quantity               uint        `json:"quantity"`
 	ActualWeightKg         float64     `json:"actual_weight_kg"`
 	SizeCode               PackageSize `json:"size_code"`
 	Status                 OrderStatus `json:"status"`
