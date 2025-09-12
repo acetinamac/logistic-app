@@ -134,7 +134,7 @@ func (r *OrderGormRepo) FindJoinedAll() ([]domain.OrderListItem, error) {
 	return r.findJoined(base)
 }
 
-func (r *OrderGormRepo) UpdateStatus(id uint, status domain.OrderStatus, changedBy uint) error {
+func (r *OrderGormRepo) UpdateStatus(id uint, internalNotes string, status domain.OrderStatus, changedBy uint) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
 		var o domain.Order
 
@@ -146,7 +146,7 @@ func (r *OrderGormRepo) UpdateStatus(id uint, status domain.OrderStatus, changed
 		}
 		prev := o.Status
 
-		if err := tx.Model(&domain.Order{}).Where("id = ?", id).Updates(map[string]interface{}{"status": status, "updated_by": changedBy}).Error; err != nil {
+		if err := tx.Model(&domain.Order{}).Where("id = ?", id).Updates(map[string]interface{}{"internal_notes": internalNotes, "status": status, "updated_by": changedBy}).Error; err != nil {
 			return err
 		}
 		h := domain.OrderStatusHistory{

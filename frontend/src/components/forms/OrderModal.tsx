@@ -118,13 +118,19 @@ const OrderModal: React.FC<OrderModalProps> = ({open, mode, orderId, onClose, on
         return hit?.id ?? 0;
     }, [pkgTypes]);
 
-    const fetchBaseData = React.useCallback(async () => {
+    const fetchBaseData = React.useCallback(async (customerIdFromOrder?: number
+    ) => {
         if (!token) return;
 
         setLoading(true);
         try {
+            let addressesUrl = `${API_BASE}/api/addresses`;
+            if (customerIdFromOrder && customerIdFromOrder !== userId) {
+                addressesUrl += `?customer_id=${customerIdFromOrder}`;
+            }
+
             const [addrRes, pkgRes, statusRes] = await Promise.all([
-                fetch(`${API_BASE}/api/addresses`, {headers: {Authorization: `Bearer ${token}`}}),
+                fetch(addressesUrl, {headers: {Authorization: `Bearer ${token}`}}),
                 fetch(`${API_BASE}/api/package-types`, {headers: {Authorization: `Bearer ${token}`}}),
                 fetch(`${API_BASE}/api/orders/status`, {headers: {Authorization: `Bearer ${token}`}}),
             ]);
@@ -168,6 +174,9 @@ const OrderModal: React.FC<OrderModalProps> = ({open, mode, orderId, onClose, on
 
             const d = (await res.json()) as OrderDetail;
             setDetail(d);
+            if (d.user_id !== userId) {
+                await fetchBaseData(d.user_id);
+            }
             // preset form with detail (for potential status update)
             setForm(f => ({
                 ...f,
@@ -190,7 +199,6 @@ const OrderModal: React.FC<OrderModalProps> = ({open, mode, orderId, onClose, on
         if (!open) return;
         fetchBaseData();
 
-        // When opening in create mode, reset form to defaults to avoid stale values
         if (!isView) {
             setDetail(null);
             setForm({
@@ -281,10 +289,10 @@ const OrderModal: React.FC<OrderModalProps> = ({open, mode, orderId, onClose, on
             const res = await fetch(`${API_BASE}/api/orders/${orderId}/status`, {
                 method: "PATCH",
                 headers: {"Content-Type": "application/json", Authorization: `Bearer ${token}`},
-                body: JSON.stringify({status: form.status}),
+                body: JSON.stringify({internal_notes: isAdmin ? form.internal_notes : "", status: form.status}),
             });
             if (!res.ok) throw new Error(await res.text());
-            notify({type: "success", message: "Estatus actualizado"});
+            notify({type: "success", message: "Orden actualizada"});
             onClose();
             onSaved?.();
         } catch (e: any) {
@@ -388,7 +396,7 @@ const OrderModal: React.FC<OrderModalProps> = ({open, mode, orderId, onClose, on
                                    value={statusOptions.find(s => s.value === form.status)?.label || form.status}/>
                         )}
                         {!isAdmin &&
-                            <div className="form-text">Al crear será "Creado". Solo un admin puede modificarlo.</div>}
+                            <div className="form-text">Solo un admin puede modificarlo.</div>}
                     </div>
 
                     {isView && detail && (

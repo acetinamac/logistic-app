@@ -45,6 +45,12 @@ const docTemplate = `{
                         "description": "Admin only: if set to 1, include inactive addresses",
                         "name": "include_inactive",
                         "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "Represent customer ID; if set, only addresses for this customer are returned",
+                        "name": "customer_id",
+                        "in": "query"
                     }
                 ],
                 "responses": {

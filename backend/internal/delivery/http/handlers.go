@@ -308,13 +308,14 @@ func (h *Handler) UpdateStatus(w http.ResponseWriter, r *http.Request) {
 	idStr := mux.Vars(r)["id"]
 	id64, _ := strconv.ParseUint(idStr, 10, 64)
 	var body struct {
-		Status domain.OrderStatus `json:"status"`
+		Status        domain.OrderStatus `json:"status"`
+		InternalNotes string             `json:"internal_notes"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
 		http.Error(w, err.Error(), 400)
 		return
 	}
-	if err := h.Orders.UpdateStatus(uint(id64), body.Status, uid); err != nil {
+	if err := h.Orders.UpdateStatus(uint(id64), body.InternalNotes, body.Status, uid); err != nil {
 		http.Error(w, err.Error(), 400)
 		return
 	}
@@ -470,6 +471,7 @@ func (h *Handler) CreateAddress(w http.ResponseWriter, r *http.Request) {
 // @Produce json
 // @Param all query string false "Admin only: if set to 1, list all users' addresses"
 // @Param include_inactive query string false "Admin only: if set to 1, include inactive addresses"
+// @Param customer_id query string false "Represent customer ID; if set, only addresses for this customer are returned"
 // @Success 200 {array} domain.Address
 // @Failure 401 {string} string "Unauthorized"
 // @Security BearerAuth
@@ -480,9 +482,17 @@ func (h *Handler) ListAddresses(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "unauthorized", 401)
 		return
 	}
+
+	if idStr := r.URL.Query().Get("customer_id"); idStr != "" {
+		if id64, err := strconv.ParseUint(idStr, 10, 64); err == nil {
+			uid = uint(id64)
+		}
+	}
+
 	includeInactive := role == domain.RoleAdmin && r.URL.Query().Get("include_inactive") == "1"
 	all := role == domain.RoleAdmin && r.URL.Query().Get("all") == "1"
 	list, err := h.Addresses.List(uid, role, includeInactive, all)
+
 	if err != nil {
 		http.Error(w, err.Error(), 500)
 		return

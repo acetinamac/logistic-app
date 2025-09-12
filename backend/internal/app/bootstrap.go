@@ -39,7 +39,7 @@ func Bootstrap(r *mux.Router) error {
 	if err := database.Where(&admin).First(&existing).Error; err != nil {
 		// Not found -> create with hashed password
 		hashed, _ := bcrypt.GenerateFromPassword([]byte("admin"), bcrypt.DefaultCost)
-		database.Create(&domain.User{Email: admin.Email, Password: string(hashed), Role: domain.RoleAdmin, FullName: "Admin", IsActive: true})
+		database.Create(&domain.User{Email: admin.Email, Password: string(hashed), Role: domain.RoleAdmin, FullName: "System Administrator", IsActive: true})
 	} else {
 		// If found and password seems not bcrypt (no prefix)
 		if len(existing.Password) > 0 && !(len(existing.Password) > 4 && existing.Password[0] == '$') {

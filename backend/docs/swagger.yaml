@@ -235,6 +235,11 @@ paths:
         in: query
         name: include_inactive
         type: string
+      - description: Represent customer ID; if set, only addresses for this customer
+          are returned
+        in: query
+        name: customer_id
+        type: string
       produces:
       - application/json
       responses:

@@ -12,7 +12,7 @@ type OrderRepo interface {
 	FindByID(id uint) (*domain.Order, error)
 	FindByCustomer(customerID uint) ([]domain.Order, error)
 	FindAll() ([]domain.Order, error)
-	UpdateStatus(id uint, status domain.OrderStatus, changedBy uint) error
+	UpdateStatus(id uint, internalNotes string, status domain.OrderStatus, changedBy uint) error
 	FindJoinedByCustomer(customerID uint) ([]domain.OrderListItem, error)
 	FindJoinedAll() ([]domain.OrderListItem, error)
 	FindDetailByID(id uint) (*domain.OrderDetail, error)
@@ -100,10 +100,10 @@ func (s *OrderService) Create(o *domain.Order) error {
 	return s.repo.Create(o)
 }
 
-func (s *OrderService) UpdateStatus(id uint, status domain.OrderStatus, changedBy uint) error {
+func (s *OrderService) UpdateStatus(id uint, internalNotes string, status domain.OrderStatus, changedBy uint) error {
 	if changedBy == 0 {
 		return errors.New("changedBy requerido")
 	}
 
-	return s.repo.UpdateStatus(id, status, changedBy)
+	return s.repo.UpdateStatus(id, internalNotes, status, changedBy)
 }

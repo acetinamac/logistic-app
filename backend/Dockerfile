@@ -1,5 +1,5 @@
 # Build stage
-FROM golang:1.24 AS builder
+FROM golang:1.25.1 AS builder
 WORKDIR /app
 
 COPY go.mod go.sum ./
@@ -8,7 +8,7 @@ RUN --mount=type=cache,target=/go/pkg/mod go mod download
 COPY . ./
 
 RUN go install github.com/swaggo/swag/cmd/swag@latest && \
-    swag init -g main.go -d cmd/api --parseDependency --parseInternal -o docs
+    swag init -g cmd/api/main.go --parseDependency --parseInternal -o docs
 
 RUN --mount=type=cache,target=/go/pkg/mod \
     --mount=type=cache,target=/root/.cache/go-build \
